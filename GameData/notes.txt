@@ -1,0 +1,10 @@
+definitions:
+defining variables
+creating game objects
+creating the game window
+
+game loop:
+event handling
+updating positions
+collision checks
+drawing
