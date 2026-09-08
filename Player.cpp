@@ -2,39 +2,39 @@
 #include "GameConfig.h"
 #include <raylib.h>
 
-Player::Player(int startX, int startY)
+Player::Player(float startX, float startY, Color color)
 {
-    x = startX;
-    y = startY;
+    body = {startX, startY, TILE_SIZE, TILE_SIZE};
+    this->color = color; 
 
-    xSpeed = 5;
-    ySpeed = 5;
+    xSpeed = 5.0;
+    ySpeed = 5.0;
 
-    xAccel = 1;
-    yAccel = 1;
+    xAccel = 1.0;
+    yAccel = 1.0;
 }
 
 void Player::Update()
 {
     if (IsKeyDown(KEY_RIGHT))
     {
-        x += xSpeed;
+        body.x += xSpeed;
     }
     if (IsKeyDown(KEY_LEFT))
     {
-        x -= xSpeed;
+        body.x -= xSpeed;
     }
     if (IsKeyDown(KEY_UP))
     {
-        y -= ySpeed;
+        body.y -= ySpeed;
     }
     if (IsKeyDown(KEY_DOWN))
     {
-        y += ySpeed;
+        body.y += ySpeed;
     }
 }
 
 void Player::Draw()
 {
-    DrawRectangle(x, y, TILE_SIZE, TILE_SIZE, RED);
+    DrawRectangleRec(body, color);
 }

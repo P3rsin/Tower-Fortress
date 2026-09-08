@@ -1,19 +1,20 @@
 #pragma once
+#include <raylib.h>
 
 class Player
 {
 private:
-    int x;
-    int y;
+    Rectangle body;
+    Color color;
 
-    int xSpeed;
-    int ySpeed;
+    float xSpeed;
+    float ySpeed;
 
-    int xAccel;
-    int yAccel;
+    float xAccel;
+    float yAccel;
 
 public:
-    Player(int startX, int startY);
+    Player(float startX, float startY, Color color);
     void Update();
     void Draw();
 };
