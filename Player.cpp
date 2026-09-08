@@ -1,17 +1,21 @@
 #include "Player.h"
+#include "Map.h"
 #include "GameConfig.h"
 #include <raylib.h>
 
 Player::Player(float startX, float startY, Color color)
 {
-    body = {startX, startY, TILE_SIZE, TILE_SIZE};
-    this->color = color; 
+    this->color = color;
+    body = {
+        startX, startY,
+        static_cast<float>(TILE_SIZE),
+        static_cast<float>(TILE_SIZE)};
 
-    xSpeed = 5.0;
-    ySpeed = 5.0;
+    xSpeed = 5.0f;
+    ySpeed = 5.0f;
 
-    xAccel = 1.0;
-    yAccel = 1.0;
+    xAccel = 1.0f;
+    yAccel = 1.0f;
 }
 
 void Player::Update()

@@ -4,17 +4,15 @@
 #include "Map.h"
 #include "GameConfig.h"
 
-using namespace std;
-
 int main()
 {
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Tower Fortress");
     SetTargetFPS(60);
 
-    Player player(0, 0, RED);
     Map map;
-
     map.Load("GameData/mapdata.txt");
+
+    Player player(0, 0, RED);
 
     while (!WindowShouldClose())
     {
