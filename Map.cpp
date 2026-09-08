@@ -54,9 +54,9 @@ void Map::Load(std::string filePath)
 
 void Map::Draw()
 {
-    for (int i = 0; i < TOTAL_NUM_TILES; i++)
+    for (Tile tile : tileList)
     {
-        DrawRectangleRec(tileList[i].getBody(), TILE_COLORS[tileList[i].getID()]);
+        DrawRectangleRec(tile.getBody(), tile.getColor());
     }
 }
 

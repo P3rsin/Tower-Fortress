@@ -6,9 +6,13 @@ class Tile
 private:
     int id;
     Rectangle body;
+    Color color;
 
 public:
     Tile(int id, Rectangle body);
-    Rectangle getBody();
-    int getID();
+    void setColor(Color color);
+    
+    const Rectangle& getBody() const;
+    int getID() const;
+    Color getColor() const;
 };

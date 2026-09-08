@@ -17,7 +17,7 @@ int main()
     while (!WindowShouldClose())
     {
         // updating
-        player.Update();
+        player.Update(map.getTileList());
 
         // drawing
         BeginDrawing();

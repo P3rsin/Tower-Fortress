@@ -1,6 +1,8 @@
 #include "Player.h"
 #include "Map.h"
+#include "Tile.h"
 #include "GameConfig.h"
+#include <vector>
 #include <raylib.h>
 
 Player::Player(float startX, float startY, Color color)
@@ -18,7 +20,7 @@ Player::Player(float startX, float startY, Color color)
     yAccel = 1.0f;
 }
 
-void Player::Update()
+void Player::Update(const std::vector<Tile> tileList)
 {
     if (IsKeyDown(KEY_RIGHT))
     {
@@ -35,6 +37,14 @@ void Player::Update()
     if (IsKeyDown(KEY_DOWN))
     {
         body.y += ySpeed;
+    }
+
+    for (Tile tile : tileList)
+    {
+        if (CheckCollisionRecs(body, tile.getBody()))
+        {
+            tile.setColor(BLACK);
+        }
     }
 }
 
