@@ -13,16 +13,12 @@ int main()
     Map map;
     map.Load("GameData/mapdata.txt");
 
-    for (Tile tile : map.getTileList()) {
-        tile.setColor(BLACK);
-    }
-
-    Player player(0, 0, RED);
+    Player player(100, 100, BRIGHTYELLOW);
 
     while (!WindowShouldClose())
     {
         // updating
-        player.Update(map.getTileList());
+        player.Update(map);
 
         // drawing
         BeginDrawing();
@@ -30,6 +26,7 @@ int main()
 
         map.Draw();
         player.Draw();
+        player.DrawDebug();
 
         EndDrawing();
     }

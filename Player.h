@@ -2,7 +2,7 @@
 #include <vector>
 #include <raylib.h>
 
-#include "Tile.h"
+#include "Map.h"
 
 class Player
 {
@@ -12,20 +12,22 @@ private:
 
     float xVelocity;
     float yVelocity;
-    float maxSpeed;
-    // maxSpeed vector magnitude vs independent axis 
+
+    float maxXSpeed;
+    float maxYSpeed;
 
     float xAccel;
     float yAccel;
 
-    float xFriction;
-    float yFriction;
+    float friction;
+    float gravity;
 
     void UpdateVelocity();
-    bool CheckCollision(const std::vector<Tile>&);
+    void CollisionCheck(const Map &map);
 
 public:
     Player(float startX, float startY, Color color);
-    void Update(const std::vector<Tile>&);
+    void Update(const Map &map);
     void Draw();
+    void DrawDebug();
 };

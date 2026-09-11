@@ -1,5 +1,6 @@
 #include <vector>
 #include <cmath>
+#include <optional>
 #include <raylib.h>
 
 #include "Player.h"
@@ -17,48 +18,50 @@ Player::Player(float startX, float startY, Color color)
 
     xVelocity = 0.0f;
     yVelocity = 0.0f;
-    maxSpeed = 10.0f;
+
+    maxXSpeed = 10.0f;
+    maxYSpeed = 15.0f;
 
     xAccel = 0.0f;
     yAccel = 0.0f;
 
-    xFriction = 0.0f;
-    yFriction = 0.0f;
+    friction = 0.0f;
+    gravity = 0.0f;
 }
 
 void Player::UpdateVelocity()
 {
-    // set xFriction
+    // set friction
     if (xVelocity == 0.0f)
     {
-        xFriction = 0.0f;
+        friction = 0.0f;
     }
     else if (xVelocity < 0.0f)
     {
-        xFriction = 0.5f;
+        friction = 0.5f;
     }
     else if (xVelocity > 1.0f)
     {
-        xFriction = -0.5f;
+        friction = -0.5f;
     }
 
-    // set yFriction
+    // set gravity
     if (yVelocity == 0.0f)
     {
-        yFriction = 0.0f;
+        gravity = 0.0f;
     }
     else if (yVelocity < 0.0f)
     {
-        yFriction = 0.5f;
+        gravity = 0.5f;
     }
     else if (yVelocity > 1.0f)
     {
-        yFriction = -0.5f;
+        gravity = -0.5f;
     }
 
     // default accels are friction
-    xAccel = xFriction;
-    yAccel = yFriction;
+    xAccel = friction;
+    yAccel = gravity;
 
     // update xAccel based on input
     if (IsKeyDown(KEY_A) && IsKeyDown(KEY_D))
@@ -89,49 +92,78 @@ void Player::UpdateVelocity()
     }
 
     // check maxSpeed before applying accel
-    if (std::abs(xVelocity + xAccel) <= maxSpeed)
+    if (std::abs(xVelocity + xAccel) <= maxXSpeed)
     {
         xVelocity += xAccel;
     }
 
-    if (std::abs(yVelocity + yAccel) <= maxSpeed)
+    if (std::abs(yVelocity + yAccel) <= maxXSpeed)
     {
         yVelocity += yAccel;
     }
 }
 
-bool Player::CheckCollision(const std::vector<Tile> &tileList)
+void Player::CollisionCheck(const Map &map)
 {
-    bool willCollide = false;
+    std::optional<Rectangle> collidingRect;
     Rectangle tempChecker = {
         body.x + xVelocity,
         body.y + yVelocity,
         TILE_SIZE,
         TILE_SIZE};
 
-    for (Tile tile : tileList)
+    for (int i = 0; i < WINDOW_TILE_WIDTH; i++)
     {
-        if (CheckCollisionRecs(tempChecker, tile.getBody()) && tile.getID() == 0)
+        for (int j = 0; j < WINDOW_TILE_HEIGHT; j++)
         {
-            willCollide = true;
+            if (CheckCollisionRecs(tempChecker, map.getTile(i, j).getBody()) && map.getTile(i, j).getID() == 1)
+            {
+                collidingRect = map.getTile(i, j).getBody();
+            }
         }
     }
 
-    return willCollide;
+    if (collidingRect.has_value())
+    {
+        float xDelta = tempChecker.x - collidingRect->x;
+        float yDelta = tempChecker.y - collidingRect->y;
+
+        xVelocity = xDelta;
+        yVelocity = yDelta;
+    }
 }
 
-void Player::Update(const std::vector<Tile> &tileList)
+void Player::Update(const Map &map)
 {
     UpdateVelocity();
+    // CollisionCheck(map);
 
-    if (!CheckCollision(tileList))
-    {
-        body.x += xVelocity;
-        body.y += yVelocity;
-    }
+    body.x += xVelocity;
+    body.y += yVelocity;
 }
 
 void Player::Draw()
 {
-    DrawRectangleRec(body, color);
+    DrawRectangle(
+        static_cast<int>(std::round(body.x)),
+        static_cast<int>(std::round(body.y)),
+        static_cast<int>(body.width),
+        static_cast<int>(body.height),
+        color);
+}
+
+void Player::DrawDebug()
+{
+    DrawText(
+        TextFormat(
+            "xPos: %.2f\nyPos: %.2f\nxVel: %.2f\nyVel: %.2f\nxAccel: %.2f\nyAccel: %.2f",
+            body.x,
+            body.y,
+            xVelocity,
+            yVelocity,
+            xAccel,
+            yAccel),
+        10, 10,
+        32,
+        WHITE);
 }

@@ -8,14 +8,14 @@ class Map
 {
 private:
     std::string filePath;
-    std::vector<std::string> mapData;
+    std::string tileIDData;
     std::vector<Tile> tileList;
 
-    void ReadFileData();
+    void LoadMapIDs();
     void CreateTiles();
 
 public:
     void Load(std::string filePath);
     void Draw();
-    const std::vector<Tile> &getTileList() const;
+    const Tile &getTile(int tileX, int tileY) const;
 };
