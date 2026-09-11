@@ -52,15 +52,23 @@ void Map::Load(std::string filePath)
 {
     this->filePath = filePath;
     LoadMapIDs();
-    Debug::Write(tileIDData);
     CreateTiles();
+}
+
+void Map::DrawDebug(const Tile &tile)
+{
+    DrawRectangleLinesEx(
+        tile.getBody(),
+        1.0f,
+        PURPLE);
 }
 
 void Map::Draw()
 {
-    for (Tile tile : tileList)
+    for (const Tile &tile : tileList)
     {
         DrawRectangleRec(tile.getBody(), tile.getColor());
+        DrawDebug(tile);
     }
 }
 

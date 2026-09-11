@@ -7,6 +7,7 @@
 #include "Map.h"
 #include "Tile.h"
 #include "GameConfig.h"
+#include "Debug.h"
 
 Player::Player(float startX, float startY, Color color)
 {
@@ -20,7 +21,7 @@ Player::Player(float startX, float startY, Color color)
     yVelocity = 0.0f;
 
     maxXSpeed = 10.0f;
-    maxYSpeed = 15.0f;
+    maxYSpeed = 10.0f;
 
     xAccel = 0.0f;
     yAccel = 0.0f;
@@ -96,50 +97,80 @@ void Player::UpdateVelocity()
     {
         xVelocity += xAccel;
     }
+    else
+    {
+        xVelocity = maxXSpeed;
+    }
 
-    if (std::abs(yVelocity + yAccel) <= maxXSpeed)
+    if (std::abs(yVelocity + yAccel) <= maxYSpeed)
     {
         yVelocity += yAccel;
     }
+    else
+    {
+        yVelocity = maxYSpeed;
+    }
 }
 
-void Player::CollisionCheck(const Map &map)
+bool Player::CollisionCheck(const Map &map)
 {
-    std::optional<Rectangle> collidingRect;
-    Rectangle tempChecker = {
+    collisionDebug.clear();
+
+    Rectangle projectedBody = {
         body.x + xVelocity,
         body.y + yVelocity,
         TILE_SIZE,
         TILE_SIZE};
 
-    for (int i = 0; i < WINDOW_TILE_WIDTH; i++)
+    int xstart = floor(projectedBody.x / TILE_SIZE);
+    int xend = ceil((projectedBody.x + projectedBody.width) / TILE_SIZE);
+
+    int ystart = floor(projectedBody.y / TILE_SIZE);
+    int yend = ceil((projectedBody.y + projectedBody.height) / TILE_SIZE);
+
+    // std::optional<Rectangle> collidingRect;
+    bool willCollide = false;
+    for (int i = xstart; i < xend; i++)
     {
-        for (int j = 0; j < WINDOW_TILE_HEIGHT; j++)
+        for (int j = ystart; j < yend; j++)
         {
-            if (CheckCollisionRecs(tempChecker, map.getTile(i, j).getBody()) && map.getTile(i, j).getID() == 1)
+            Tile curTile = map.getTile(i, j);
+
+            collisionDebug.push_back(
+                "Tile (" + std::to_string(i) + ", " + std::to_string(j) + ")" +
+                " | ID: " + std::to_string(curTile.getID()) +
+                " | Position: (" +
+                std::to_string(curTile.getBody().x) + ", " +
+                std::to_string(curTile.getBody().y) + ")");
+
+            if (CheckCollisionRecs(projectedBody, curTile.getBody()) && curTile.getID() == 0)
             {
-                collidingRect = map.getTile(i, j).getBody();
+                willCollide = true;
             }
         }
     }
 
-    if (collidingRect.has_value())
-    {
-        float xDelta = tempChecker.x - collidingRect->x;
-        float yDelta = tempChecker.y - collidingRect->y;
+    // if (collidingRect.has_value())
+    // {
+    //     float xDelta = projectedBody.x - collidingRect->x;
+    //     float yDelta = projectedBody.y - collidingRect->y;
 
-        xVelocity = xDelta;
-        yVelocity = yDelta;
-    }
+    //     xVelocity = xDelta;
+    //     yVelocity = yDelta;
+    // }
+
+    Debug::Clear();
+    return willCollide;
 }
 
 void Player::Update(const Map &map)
 {
     UpdateVelocity();
-    // CollisionCheck(map);
-
-    body.x += xVelocity;
-    body.y += yVelocity;
+    if (!CollisionCheck(map))
+    {
+        body.x += xVelocity;
+        body.y += yVelocity;
+    }
 }
 
 void Player::Draw()
@@ -166,4 +197,18 @@ void Player::DrawDebug()
         10, 10,
         32,
         WHITE);
+
+    int y = 220;
+
+    for (const std::string &line : collisionDebug)
+    {
+        DrawText(
+            line.c_str(),
+            10,
+            y,
+            20,
+            WHITE);
+
+        y += 25;
+    }
 }

@@ -23,7 +23,9 @@ private:
     float gravity;
 
     void UpdateVelocity();
-    void CollisionCheck(const Map &map);
+    bool CollisionCheck(const Map &map);
+
+    std::vector<std::string> collisionDebug;
 
 public:
     Player(float startX, float startY, Color color);

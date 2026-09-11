@@ -4,10 +4,7 @@
 
 namespace Debug
 {
-    void Clear()
-    {
-        std::ofstream file("GameData/output.txt", std::ios::trunc);
-    };
+    void Clear();
 
     template <typename T>
     void Write(const T &value)

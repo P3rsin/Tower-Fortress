@@ -14,6 +14,8 @@ private:
     void LoadMapIDs();
     void CreateTiles();
 
+    void DrawDebug(const Tile &tile);
+
 public:
     void Load(std::string filePath);
     void Draw();
