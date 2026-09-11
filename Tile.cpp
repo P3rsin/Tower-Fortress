@@ -1,6 +1,7 @@
 #include <raylib.h>
-#include "GameConfig.h"
+
 #include "Tile.h"
+#include "GameConfig.h"
 
 Tile::Tile(int id, Rectangle body)
 {
@@ -9,18 +10,22 @@ Tile::Tile(int id, Rectangle body)
     color = TILE_COLORS[id];
 }
 
-void Tile::setColor(Color color) {
+void Tile::setColor(Color color)
+{
     this->color = color;
 }
 
-const Rectangle& Tile::getBody() const {
+const Rectangle &Tile::getBody() const
+{
     return body;
 }
 
-int Tile::getID() const {
+int Tile::getID() const
+{
     return id;
 }
 
-Color Tile::getColor() const {
+Color Tile::getColor() const
+{
     return color;
 }

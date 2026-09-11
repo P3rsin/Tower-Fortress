@@ -1,7 +1,7 @@
 #pragma once
-
 #include <string>
 #include <vector>
+
 #include "Tile.h"
 
 class Map
@@ -17,5 +17,5 @@ private:
 public:
     void Load(std::string filePath);
     void Draw();
-    const std::vector<Tile>& getTileList() const;
+    const std::vector<Tile> &getTileList() const;
 };

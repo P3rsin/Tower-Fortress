@@ -1,6 +1,7 @@
 #include <raylib.h>
 
 #include "Player.h"
+#include "Tile.h"
 #include "Map.h"
 #include "GameConfig.h"
 
@@ -11,6 +12,10 @@ int main()
 
     Map map;
     map.Load("GameData/mapdata.txt");
+
+    for (Tile tile : map.getTileList()) {
+        tile.setColor(BLACK);
+    }
 
     Player player(0, 0, RED);
 

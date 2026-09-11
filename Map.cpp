@@ -1,10 +1,10 @@
+#include <fstream>
+#include <iostream>
+#include <raylib.h>
+
 #include "Map.h"
 #include "Tile.h"
 #include "GameConfig.h"
-
-#include <raylib.h>
-#include <fstream>
-#include <iostream>
 
 void Map::ReadFileData()
 {
@@ -12,7 +12,7 @@ void Map::ReadFileData()
 
     if (!file.is_open())
     {
-        std::cout << "Map Data file opening error!";
+        std::cout << "error opening " << filePath << std::endl;
     }
 
     std::string line;
