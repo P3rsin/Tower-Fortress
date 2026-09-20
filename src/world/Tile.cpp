@@ -3,16 +3,16 @@
 #include "GameConfig.h"
 #include "world/Tile.h"
 
-Tile::Tile(int id, Rectangle body)
-    : id(id),
-      body(body),
-      color(TILE_COLORS[id])
+Tile::Tile()
+    : id(-1),
+      body{0.0f, 0.0f, 0.0f, 0.0f}
 {
 }
 
-void Tile::setColor(const Color &color)
+Tile::Tile(int id, Rectangle body)
+    : id(id),
+      body(body)
 {
-    this->color = color;
 }
 
 const Rectangle &Tile::getBody() const
@@ -27,5 +27,9 @@ int Tile::getID() const
 
 const Color &Tile::getColor() const
 {
-    return color;
+    return TILE_PROPERTIES[id].color;
+}
+
+bool Tile::isSolid() const {
+    return TILE_PROPERTIES[id].isSolid;
 }

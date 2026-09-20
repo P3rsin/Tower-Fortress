@@ -6,30 +6,35 @@
 
 class Player
 {
+public:
+    Player(float startX, float startY, Color color);
+
+    void Update(const Map &map);
+    void Draw() const;
+    void DrawDebug() const;
+
 private:
     Rectangle body;
     Color color;
 
-    float xVelocity;
-    float yVelocity;
+    float xVelocity = 0.0f;
+    float yVelocity = 0.0f;
 
-    float maxXSpeed;
-    float maxYSpeed;
+    float maxXSpeed = 10.0f;
+    float maxYSpeed = 10.0f;
 
-    float xAccel;
-    float yAccel;
+    float xAccel = 0.0f;
+    float yAccel = 0.0f;
 
-    float friction;
-    float gravity;
+    float xDeaccel = 0.0f;
+    float yDeaccel = 0.0f;
+
+    bool xColliding = false;
+    bool yColliding = false;
 
     void UpdateVelocity();
-    bool CollisionCheck(const Map &map);
+    void ResolveXCollision(const Map &map);
+    void ResolveYCollision(const Map &map);
 
     std::vector<std::string> collisionDebug;
-
-public:
-    Player(float startX, float startY, Color color);
-    void Update(const Map &map);
-    void Draw();
-    void DrawDebug();
 };

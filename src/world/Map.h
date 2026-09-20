@@ -6,6 +6,11 @@
 
 class Map
 {
+public:
+    void Load(const std::string &filePath);
+    void Draw() const;
+    const Tile &getTile(int tileX, int tileY) const;
+
 private:
     std::string filePath;
     std::string tileIDData;
@@ -15,9 +20,4 @@ private:
     void CreateTiles();
 
     void DrawDebug(const Tile &tile) const;
-
-public:
-    void Load(const std::string &filePath);
-    void Draw() const;
-    const Tile &getTile(int tileX, int tileY) const;
 };

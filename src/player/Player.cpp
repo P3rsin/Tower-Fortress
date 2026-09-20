@@ -10,101 +10,113 @@
 #include "debug/Debug.h"
 
 Player::Player(float startX, float startY, Color color)
+    : body{startX, startY,
+           static_cast<float>(TILE_SIZE),
+           static_cast<float>(TILE_SIZE)},
+      color(color)
 {
-    this->color = color;
-    body = {
-        startX, startY,
-        static_cast<float>(TILE_SIZE),
-        static_cast<float>(TILE_SIZE)};
-
-    xVelocity = 0.0f;
-    yVelocity = 0.0f;
-
-    maxXSpeed = 10.0f;
-    maxYSpeed = 10.0f;
-
-    xAccel = 0.0f;
-    yAccel = 0.0f;
-
-    friction = 0.0f;
-    gravity = 0.0f;
 }
 
 void Player::UpdateVelocity()
 {
-    // set friction
+    // set xDeaccel
     if (xVelocity == 0.0f)
     {
-        friction = 0.0f;
+        xDeaccel = 0.0f;
     }
     else if (xVelocity < 0.0f)
     {
-        friction = 0.5f;
+        xDeaccel = 0.5f;
+
+        if (xDeaccel + xVelocity > 0.0f)
+        {
+            xDeaccel = -xVelocity;
+        }
     }
-    else if (xVelocity > 1.0f)
+    else if (xVelocity > 0.0f)
     {
-        friction = -0.5f;
+        xDeaccel = -0.5f;
+
+        if (xDeaccel + xVelocity < 0.0f)
+        {
+            xDeaccel = -xVelocity;
+        }
     }
 
-    // set gravity
+    // set yDeaccel
     if (yVelocity == 0.0f)
     {
-        gravity = 0.0f;
+        yDeaccel = 0.0f;
     }
     else if (yVelocity < 0.0f)
     {
-        gravity = 0.5f;
+        yDeaccel = 0.5f;
+
+        if (yDeaccel + yVelocity > 0.0f)
+        {
+            yDeaccel = -yVelocity;
+        }
     }
-    else if (yVelocity > 1.0f)
+    else if (yVelocity > 0.0f)
     {
-        gravity = -0.5f;
+        yDeaccel = -0.5f;
+
+        if (yDeaccel + yVelocity < 0.0f)
+        {
+            yDeaccel = -yVelocity;
+        }
     }
 
-    // default accels are friction
-    xAccel = friction;
-    yAccel = gravity;
-
-    // update xAccel based on input
-    if (IsKeyDown(KEY_A) && IsKeyDown(KEY_D))
-    {
-        xAccel = 0.0f;
-    }
-    else if (IsKeyDown(KEY_A))
+    // update xAccel based on input, default xDeaccel
+    if (IsKeyDown(KEY_A) && !IsKeyDown(KEY_D))
     {
         xAccel = -1.0f;
     }
-    else if (IsKeyDown(KEY_D))
+    else if (!IsKeyDown(KEY_A) && IsKeyDown(KEY_D))
     {
         xAccel = 1.0f;
     }
-
-    // update yAccel based on input
-    if (IsKeyDown(KEY_W) && IsKeyDown(KEY_S))
+    else
     {
-        yAccel = 0.0f;
+        xAccel = xDeaccel;
     }
-    else if (IsKeyDown(KEY_W))
+
+    // update yAccel based on input, default yDeaccel
+    if (IsKeyDown(KEY_W) && !IsKeyDown(KEY_S))
     {
         yAccel = -1.0f;
     }
-    else if (IsKeyDown(KEY_S))
+    else if (!IsKeyDown(KEY_W) && IsKeyDown(KEY_S))
     {
         yAccel = 1.0f;
     }
+    else
+    {
+        yAccel = yDeaccel;
+    }
 
-    // check maxSpeed before applying accel
+    // check maxXSpeed before applying accel
     if (std::abs(xVelocity + xAccel) <= maxXSpeed)
     {
         xVelocity += xAccel;
+    }
+    else if (xVelocity < 0.0f)
+    {
+        xVelocity = -maxXSpeed;
     }
     else
     {
         xVelocity = maxXSpeed;
     }
 
+    // check maxYSpeed before applying accel
     if (std::abs(yVelocity + yAccel) <= maxYSpeed)
     {
         yVelocity += yAccel;
+    }
+    else if (yVelocity < 0.0f)
+    {
+        yVelocity = -maxYSpeed;
     }
     else
     {
@@ -112,27 +124,28 @@ void Player::UpdateVelocity()
     }
 }
 
-bool Player::CollisionCheck(const Map &map)
+void Player::ResolveXCollision(const Map &map)
 {
     collisionDebug.clear();
 
-    Rectangle projectedBody = {
+    Rectangle projectedXBody = {
         body.x + xVelocity,
-        body.y + yVelocity,
+        body.y,
         TILE_SIZE,
         TILE_SIZE};
 
-    int xstart = floor(projectedBody.x / TILE_SIZE);
-    int xend = ceil((projectedBody.x + projectedBody.width) / TILE_SIZE);
+    int xStart = floor(projectedXBody.x / TILE_SIZE);
+    int xEnd = ceil((projectedXBody.x + projectedXBody.width) / TILE_SIZE);
 
-    int ystart = floor(projectedBody.y / TILE_SIZE);
-    int yend = ceil((projectedBody.y + projectedBody.height) / TILE_SIZE);
+    int yStart = floor(projectedXBody.y / TILE_SIZE);
+    int yEnd = ceil((projectedXBody.y + projectedXBody.height) / TILE_SIZE);
 
-    // std::optional<Rectangle> collidingRect;
-    bool willCollide = false;
-    for (int i = xstart; i < xend; i++)
+    xColliding = false;
+    Tile collidingTile;
+
+    for (int i = xStart; i < xEnd; i++)
     {
-        for (int j = ystart; j < yend; j++)
+        for (int j = yStart; j < yEnd; j++)
         {
             Tile curTile = map.getTile(i, j);
 
@@ -143,37 +156,79 @@ bool Player::CollisionCheck(const Map &map)
                 std::to_string(curTile.getBody().x) + ", " +
                 std::to_string(curTile.getBody().y) + ")");
 
-            if (CheckCollisionRecs(projectedBody, curTile.getBody()) && curTile.getID() == 0)
+            if (CheckCollisionRecs(projectedXBody, curTile.getBody()) && curTile.isSolid())
             {
-                willCollide = true;
+                xColliding = true;
+                collidingTile = curTile;
             }
         }
     }
 
-    // if (collidingRect.has_value())
-    // {
-    //     float xDelta = projectedBody.x - collidingRect->x;
-    //     float yDelta = projectedBody.y - collidingRect->y;
-
-    //     xVelocity = xDelta;
-    //     yVelocity = yDelta;
-    // }
+    if (xColliding && collidingTile.getBody().x < body.x)
+    {
+        xVelocity = collidingTile.getBody().x + collidingTile.getBody().width - body.x;
+    }
+    else if (xColliding && collidingTile.getBody().x > body.x)
+    {
+        xVelocity = collidingTile.getBody().x - (body.x + body.width);
+    }
 
     Debug::Clear();
-    return willCollide;
+}
+
+void Player::ResolveYCollision(const Map &map)
+{
+    Rectangle projectedYBody = {
+        body.x,
+        body.y + yVelocity,
+        TILE_SIZE,
+        TILE_SIZE};
+
+    int xStart = floor(projectedYBody.x / TILE_SIZE);
+    int xEnd = ceil((projectedYBody.x + projectedYBody.width) / TILE_SIZE);
+
+    int yStart = floor(projectedYBody.y / TILE_SIZE);
+    int yEnd = ceil((projectedYBody.y + projectedYBody.height) / TILE_SIZE);
+
+    yColliding = false;
+    Tile collidingTile;
+
+    for (int i = xStart; i < xEnd; i++)
+    {
+        for (int j = yStart; j < yEnd; j++)
+        {
+            Tile curTile = map.getTile(i, j);
+
+            if (CheckCollisionRecs(projectedYBody, curTile.getBody()) && curTile.isSolid())
+            {
+                yColliding = true;
+                collidingTile = curTile;
+            }
+        }
+    }
+
+    if (yColliding && collidingTile.getBody().y < body.y)
+    {
+        yVelocity = collidingTile.getBody().y + collidingTile.getBody().height - body.y;
+    }
+    else if (yColliding && collidingTile.getBody().y > body.y)
+    {
+        yVelocity = collidingTile.getBody().y - (body.y + body.height);
+    }
 }
 
 void Player::Update(const Map &map)
 {
     UpdateVelocity();
-    if (!CollisionCheck(map))
-    {
-        body.x += xVelocity;
-        body.y += yVelocity;
-    }
+
+    ResolveXCollision(map);
+    ResolveYCollision(map);
+
+    body.x += xVelocity;
+    body.y += yVelocity;
 }
 
-void Player::Draw()
+void Player::Draw() const
 {
     DrawRectangle(
         static_cast<int>(std::round(body.x)),
@@ -183,7 +238,7 @@ void Player::Draw()
         color);
 }
 
-void Player::DrawDebug()
+void Player::DrawDebug() const
 {
     DrawText(
         TextFormat(
