@@ -4,6 +4,6 @@ namespace Debug
 {
     void Clear()
     {
-        std::ofstream file("GameData/output.txt", std::ios::trunc);
+        std::ofstream file("assets/debugStream.txt", std::ios::trunc);
     }
 }

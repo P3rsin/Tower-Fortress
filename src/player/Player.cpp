@@ -1,6 +1,5 @@
 #include <vector>
 #include <cmath>
-#include <optional>
 #include <raylib.h>
 
 #include "GameConfig.h"
@@ -17,119 +16,114 @@ Player::Player(float startX, float startY, Color color)
 {
 }
 
-void Player::UpdateVelocity()
+// if I'm moving, velocity = +-accel
+// if I'm not moving velocity = +-deaccel
+
+void Player::UpdateVelocity(float dt)
 {
-    // set xDeaccel
-    if (xVelocity == 0.0f)
-    {
-        xDeaccel = 0.0f;
-    }
-    else if (xVelocity < 0.0f)
-    {
-        xDeaccel = 0.5f;
-
-        if (xDeaccel + xVelocity > 0.0f)
-        {
-            xDeaccel = -xVelocity;
-        }
-    }
-    else if (xVelocity > 0.0f)
-    {
-        xDeaccel = -0.5f;
-
-        if (xDeaccel + xVelocity < 0.0f)
-        {
-            xDeaccel = -xVelocity;
-        }
-    }
-
-    // set yDeaccel
-    if (yVelocity == 0.0f)
-    {
-        yDeaccel = 0.0f;
-    }
-    else if (yVelocity < 0.0f)
-    {
-        yDeaccel = 0.5f;
-
-        if (yDeaccel + yVelocity > 0.0f)
-        {
-            yDeaccel = -yVelocity;
-        }
-    }
-    else if (yVelocity > 0.0f)
-    {
-        yDeaccel = -0.5f;
-
-        if (yDeaccel + yVelocity < 0.0f)
-        {
-            yDeaccel = -yVelocity;
-        }
-    }
-
-    // update xAccel based on input, default xDeaccel
+    // I'm moving, apply xAccel based on input
     if (IsKeyDown(KEY_A) && !IsKeyDown(KEY_D))
     {
-        xAccel = -1.0f;
+        xVelocity += -xAccel * dt;
     }
     else if (!IsKeyDown(KEY_A) && IsKeyDown(KEY_D))
     {
-        xAccel = 1.0f;
+        xVelocity += xAccel * dt;
     }
-    else
+    else // either A && D or !A && !D, apply xDeaccel
     {
-        xAccel = xDeaccel;
+        if (xVelocity < 0.0f)
+        {
+            if (xVelocity + xDeaccel * dt > 0.0f)
+            {
+                xVelocity = 0.0f;
+            }
+            else
+            {
+                xVelocity += xDeaccel * dt;
+            }
+        }
+        else if (xVelocity > 0.0f)
+        {
+            if (xVelocity - xDeaccel * dt < 0.0f)
+            {
+                xVelocity = 0.0f;
+            }
+            else
+            {
+                xVelocity -= xDeaccel * dt;
+            }
+        }
     }
 
-    // update yAccel based on input, default yDeaccel
+    // I'm moving, apply yAccel based on input
     if (IsKeyDown(KEY_W) && !IsKeyDown(KEY_S))
     {
-        yAccel = -1.0f;
+        yVelocity += -yAccel * dt;
     }
     else if (!IsKeyDown(KEY_W) && IsKeyDown(KEY_S))
     {
-        yAccel = 1.0f;
+        yVelocity += yAccel * dt;
     }
-    else
+    else // either W && S or !W && !S, apply yDeaccel
     {
-        yAccel = yDeaccel;
+        if (yVelocity < 0.0f)
+        {
+            if (yVelocity + yDeaccel * dt > 0.0f)
+            {
+                yVelocity = 0.0f;
+            }
+            else
+            {
+                yVelocity += yDeaccel * dt;
+            }
+        }
+        else if (yVelocity > 0.0f)
+        {
+            if (yVelocity - yDeaccel * dt < 0.0f)
+            {
+                yVelocity = 0.0f;
+            }
+            else
+            {
+                yVelocity -= yDeaccel * dt;
+            }
+        }
     }
 
-    // check maxXSpeed before applying accel
-    if (std::abs(xVelocity + xAccel) <= maxXSpeed)
+    // check maxXSpeed
+    if (std::abs(xVelocity) > maxXSpeed)
     {
-        xVelocity += xAccel;
-    }
-    else if (xVelocity < 0.0f)
-    {
-        xVelocity = -maxXSpeed;
-    }
-    else
-    {
-        xVelocity = maxXSpeed;
+        if (xVelocity < 0.0f)
+        {
+            xVelocity = -maxXSpeed;
+        }
+        else
+        {
+            xVelocity = maxXSpeed;
+        }
     }
 
-    // check maxYSpeed before applying accel
-    if (std::abs(yVelocity + yAccel) <= maxYSpeed)
+    // check maxYSpeed
+    if (std::abs(yVelocity) > maxYSpeed)
     {
-        yVelocity += yAccel;
-    }
-    else if (yVelocity < 0.0f)
-    {
-        yVelocity = -maxYSpeed;
-    }
-    else
-    {
-        yVelocity = maxYSpeed;
+        if (yVelocity < 0.0f)
+        {
+            yVelocity = -maxYSpeed;
+        }
+        else
+        {
+            yVelocity = maxYSpeed;
+        }
     }
 }
 
-void Player::ResolveXCollision(const Map &map)
+void Player::ResolveXCollision(const Map &map, float dt)
 {
     collisionDebug.clear();
 
     Rectangle projectedXBody = {
-        body.x + xVelocity,
+        body.x + xVelocity * dt,
         body.y,
         TILE_SIZE,
         TILE_SIZE};
@@ -147,7 +141,7 @@ void Player::ResolveXCollision(const Map &map)
     {
         for (int j = yStart; j < yEnd; j++)
         {
-            Tile curTile = map.getTile(i, j);
+            const Tile &curTile = map.getTile(i, j);
 
             collisionDebug.push_back(
                 "Tile (" + std::to_string(i) + ", " + std::to_string(j) + ")" +
@@ -166,21 +160,23 @@ void Player::ResolveXCollision(const Map &map)
 
     if (xColliding && collidingTile.getBody().x < body.x)
     {
-        xVelocity = collidingTile.getBody().x + collidingTile.getBody().width - body.x;
+        body.x = collidingTile.getBody().x + collidingTile.getBody().width;
+        xVelocity = 0.0f;
     }
     else if (xColliding && collidingTile.getBody().x > body.x)
     {
-        xVelocity = collidingTile.getBody().x - (body.x + body.width);
+        body.x = collidingTile.getBody().x - body.width;
+        xVelocity = 0.0f;
     }
 
     Debug::Clear();
 }
 
-void Player::ResolveYCollision(const Map &map)
+void Player::ResolveYCollision(const Map &map, float dt)
 {
     Rectangle projectedYBody = {
         body.x,
-        body.y + yVelocity,
+        body.y + yVelocity * dt,
         TILE_SIZE,
         TILE_SIZE};
 
@@ -197,7 +193,7 @@ void Player::ResolveYCollision(const Map &map)
     {
         for (int j = yStart; j < yEnd; j++)
         {
-            Tile curTile = map.getTile(i, j);
+            const Tile &curTile = map.getTile(i, j);
 
             if (CheckCollisionRecs(projectedYBody, curTile.getBody()) && curTile.isSolid())
             {
@@ -209,23 +205,26 @@ void Player::ResolveYCollision(const Map &map)
 
     if (yColliding && collidingTile.getBody().y < body.y)
     {
-        yVelocity = collidingTile.getBody().y + collidingTile.getBody().height - body.y;
+        body.y = collidingTile.getBody().y + collidingTile.getBody().height;
+        yVelocity = 0.0f;
     }
     else if (yColliding && collidingTile.getBody().y > body.y)
     {
-        yVelocity = collidingTile.getBody().y - (body.y + body.height);
+        body.y = collidingTile.getBody().y - body.height;
+        yVelocity = 0.0f;
     }
 }
 
 void Player::Update(const Map &map)
 {
-    UpdateVelocity();
+    float dt = GetFrameTime();
+    UpdateVelocity(dt);
 
-    ResolveXCollision(map);
-    ResolveYCollision(map);
+    ResolveXCollision(map, dt);
+    body.x += xVelocity * dt;
 
-    body.x += xVelocity;
-    body.y += yVelocity;
+    ResolveYCollision(map, dt);
+    body.y += yVelocity * dt;
 }
 
 void Player::Draw() const

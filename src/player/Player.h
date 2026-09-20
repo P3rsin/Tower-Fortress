@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 #include <vector>
 #include <raylib.h>
 
@@ -20,21 +21,21 @@ private:
     float xVelocity = 0.0f;
     float yVelocity = 0.0f;
 
-    float maxXSpeed = 10.0f;
-    float maxYSpeed = 10.0f;
+    const float maxXSpeed = 500.0f;
+    const float maxYSpeed = 500.0f;
 
-    float xAccel = 0.0f;
-    float yAccel = 0.0f;
+    const float xAccel = 2500.0f;
+    const float yAccel = 2500.0f;
 
-    float xDeaccel = 0.0f;
-    float yDeaccel = 0.0f;
+    const float xDeaccel = 3500.0f;
+    const float yDeaccel = 3500.0f;
 
     bool xColliding = false;
     bool yColliding = false;
 
-    void UpdateVelocity();
-    void ResolveXCollision(const Map &map);
-    void ResolveYCollision(const Map &map);
+    void UpdateVelocity(float dt);
+    void ResolveXCollision(const Map &map, float dt);
+    void ResolveYCollision(const Map &map, float dt);
 
     std::vector<std::string> collisionDebug;
 };
