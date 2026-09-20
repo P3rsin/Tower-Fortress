@@ -14,10 +14,10 @@ private:
     void LoadMapIDs();
     void CreateTiles();
 
-    void DrawDebug(const Tile &tile);
+    void DrawDebug(const Tile &tile) const;
 
 public:
-    void Load(std::string filePath);
-    void Draw();
+    void Load(const std::string &filePath);
+    void Draw() const;
     const Tile &getTile(int tileX, int tileY) const;
 };

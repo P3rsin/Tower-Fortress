@@ -4,13 +4,13 @@
 #include "world/Tile.h"
 
 Tile::Tile(int id, Rectangle body)
+    : id(id),
+      body(body),
+      color(TILE_COLORS[id])
 {
-    this->id = id;
-    this->body = body;
-    color = TILE_COLORS[id];
 }
 
-void Tile::setColor(Color color)
+void Tile::setColor(const Color &color)
 {
     this->color = color;
 }
@@ -25,7 +25,7 @@ int Tile::getID() const
     return id;
 }
 
-Color Tile::getColor() const
+const Color &Tile::getColor() const
 {
     return color;
 }

@@ -9,7 +9,7 @@ namespace Debug
     template <typename T>
     void Write(const T &value)
     {
-        std::ofstream file("GameData/output.txt", std::ios::app);
+        std::ofstream file("GameData/debugStream.txt", std::ios::app);
         file << value << '\n';
     }
 }

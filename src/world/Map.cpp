@@ -9,12 +9,13 @@
 
 void Map::LoadMapIDs()
 {
-    tileIDData = "";
+    tileIDData.clear();
     std::ifstream file(filePath);
 
     if (!file.is_open())
     {
-        std::cout << "error opening " << filePath << std::endl;
+        std::cerr << "error opening " << filePath << '\n';
+        return;
     }
 
     std::string line;
@@ -23,47 +24,43 @@ void Map::LoadMapIDs()
     {
         tileIDData += line;
     }
-
-    file.close();
 }
 
 void Map::CreateTiles()
 {
-    for (int i = 0; i < TOTAL_NUM_TILES; i++)
+    tileList.clear();
+    
+    for (size_t i = 0; i < TOTAL_NUM_TILES; i++)
     {
-        int tileX = i % WINDOW_TILE_WIDTH;
-        int tileY = i / WINDOW_TILE_WIDTH;
+        const int tileX = i % WINDOW_TILE_WIDTH;
+        const int tileY = i / WINDOW_TILE_WIDTH;
 
-        int retrievalIdx = i * TILE_ID_STRIDE;
-        std::string curTileID = tileIDData.substr(retrievalIdx, TILE_ID_LENGTH);
+        const size_t retrievalIdx = i * TILE_ID_STRIDE;
+        const std::string curTileID = tileIDData.substr(retrievalIdx, TILE_ID_LENGTH);
 
-        Rectangle rect = {
+        const Rectangle rect = {
             static_cast<float>(tileX * TILE_SIZE),
             static_cast<float>(tileY * TILE_SIZE),
             static_cast<float>(TILE_SIZE),
             static_cast<float>(TILE_SIZE)};
 
-        Tile tile = Tile(std::stoi(curTileID), rect);
-        tileList.push_back(tile);
+        tileList.emplace_back(std::stoi(curTileID), rect);
     }
 }
 
-void Map::Load(std::string filePath)
+void Map::Load(const std::string &filePath)
 {
     this->filePath = filePath;
     LoadMapIDs();
     CreateTiles();
 }
 
-void Map::DrawDebug(const Tile &tile)
+void Map::DrawDebug(const Tile &tile) const
 {
-    DrawRectangleLinesEx(
-        tile.getBody(),
-        1.0f,
-        PURPLE);
+    DrawRectangleLinesEx(tile.getBody(), 1.0f, PURPLE);
 }
 
-void Map::Draw()
+void Map::Draw() const
 {
     for (const Tile &tile : tileList)
     {

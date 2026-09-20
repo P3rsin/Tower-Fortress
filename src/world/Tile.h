@@ -10,9 +10,9 @@ private:
 
 public:
     Tile(int id, Rectangle body);
-    void setColor(Color color);
-    
-    const Rectangle& getBody() const;
+
+    void setColor(const Color &color);
+    const Rectangle &getBody() const;
     int getID() const;
-    Color getColor() const;
+    const Color &getColor() const;
 };

@@ -24,6 +24,6 @@ inline const std::vector<Color> TILE_COLORS = {BRIGHTCYAN, DARKCHARCOAL};
 inline const std::vector<int> TILE_IS_SOLID = {1, 0};
 
 // MAP FILE PARSING - based on txt formatting used 
-constexpr int TILE_ID_LENGTH = 2;
-constexpr int TILE_ID_SEPARATOR_LENGTH = 1;
-constexpr int TILE_ID_STRIDE = TILE_ID_LENGTH + TILE_ID_SEPARATOR_LENGTH; 
+constexpr size_t TILE_ID_LENGTH = 2;
+constexpr size_t TILE_ID_SEPARATOR_LENGTH = 1;
+constexpr size_t TILE_ID_STRIDE = TILE_ID_LENGTH + TILE_ID_SEPARATOR_LENGTH; 
