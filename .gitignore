@@ -1,4 +1,3 @@
-GameData/game
-GameData/notes.txt
-GameData/output.txt
 .vscode
+build/
+GameData/output.txt
