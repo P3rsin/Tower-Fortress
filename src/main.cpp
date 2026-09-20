@@ -13,7 +13,7 @@ int main()
     Map map;
     map.Load("assets/mapdata.txt");
 
-    Player player(100, 100, BRIGHTYELLOW);
+    Player player(100, 100, 80, 80, BRIGHTYELLOW);
 
     while (!WindowShouldClose())
     {

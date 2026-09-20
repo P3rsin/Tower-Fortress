@@ -8,7 +8,7 @@
 class Player
 {
 public:
-    Player(float startX, float startY, Color color);
+    Player(float startX, float startY, float width, float height, Color color);
 
     void Update(const Map &map);
     void Draw() const;
@@ -19,19 +19,22 @@ private:
     Color color;
 
     float xVelocity = 0.0f;
+    const float maxXSpeed = 650.0f;
+    const float xAccel = 6250.0f;
+    const float airAccel = 3000.0f;
+    const float xDeaccel = 9000.0f;
+
     float yVelocity = 0.0f;
-
-    const float maxXSpeed = 500.0f;
-    const float maxYSpeed = 500.0f;
-
-    const float xAccel = 2500.0f;
-    const float yAccel = 2500.0f;
-
-    const float xDeaccel = 3500.0f;
-    const float yDeaccel = 3500.0f;
+    const float maxFallSpeed = 1200.0f;
+    const float gravity = 2500.0f;
+    const float jumpSpeed = 900.0f;
 
     bool xColliding = false;
     bool yColliding = false;
+
+    bool isGrounded = false;
+    bool hitCeiling = false;
+    bool falling = false;
 
     void UpdateVelocity(float dt);
     void ResolveXCollision(const Map &map, float dt);
