@@ -1,7 +1,7 @@
 #include <raylib.h>
 
-#include "Tile.h"
 #include "GameConfig.h"
+#include "world/Tile.h"
 
 Tile::Tile(int id, Rectangle body)
 {

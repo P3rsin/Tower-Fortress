@@ -1,9 +1,9 @@
 #include <raylib.h>
 
-#include "Player.h"
-#include "Tile.h"
-#include "Map.h"
 #include "GameConfig.h"
+#include "player/Player.h"
+#include "world/Map.h"
+#include "world/Tile.h"
 
 int main()
 {
@@ -11,7 +11,7 @@ int main()
     SetTargetFPS(60);
 
     Map map;
-    map.Load("GameData/mapdata.txt");
+    map.Load("assets/mapdata.txt");
 
     Player player(100, 100, BRIGHTYELLOW);
 

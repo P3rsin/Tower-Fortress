@@ -3,11 +3,11 @@
 #include <optional>
 #include <raylib.h>
 
-#include "Player.h"
-#include "Map.h"
-#include "Tile.h"
 #include "GameConfig.h"
-#include "Debug.h"
+#include "world/Map.h"
+#include "world/Tile.h"
+#include "player/Player.h"
+#include "debug/Debug.h"
 
 Player::Player(float startX, float startY, Color color)
 {

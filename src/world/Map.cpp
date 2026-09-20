@@ -2,10 +2,10 @@
 #include <iostream>
 #include <raylib.h>
 
-#include "Map.h"
-#include "Tile.h"
 #include "GameConfig.h"
-#include "Debug.h"
+#include "world/Map.h"
+#include "world/Tile.h"
+#include "debug/Debug.h"
 
 void Map::LoadMapIDs()
 {
