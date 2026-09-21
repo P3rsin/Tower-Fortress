@@ -29,7 +29,7 @@ void Map::LoadMapIDs()
 void Map::CreateTiles()
 {
     tileList.clear();
-    
+
     for (size_t i = 0; i < TOTAL_NUM_TILES; i++)
     {
         const int tileX = i % WINDOW_TILE_WIDTH;
@@ -72,4 +72,9 @@ void Map::Draw() const
 const Tile &Map::getTile(int tileX, int tileY) const
 {
     return tileList[(tileY * WINDOW_TILE_WIDTH) + tileX];
+}
+
+bool Map::isInBounds(int tileX, int tileY) const
+{
+    return tileX >= 0 && tileX < WINDOW_TILE_WIDTH && tileY >= 0 && tileY < WINDOW_TILE_HEIGHT;
 }

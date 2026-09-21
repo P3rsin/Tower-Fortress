@@ -16,30 +16,28 @@ Player::Player(float startX, float startY, float width, float height, Color colo
 
 void Player::UpdateVelocity(float dt)
 {
-    // I'm moving, apply xAccel based on input
+    // pick the appropriate acceleration
+    float currentAccel;
+
+    if (isGrounded)
+    {
+        currentAccel = xAccel;
+    }
+    else
+    {
+        currentAccel = airAccel;
+    }
+
+    // I'm moving, so apply currentAccel based on input
     if (IsKeyDown(KEY_A) && !IsKeyDown(KEY_D))
     {
-        if (falling)
-        {
-            xVelocity += -airAccel * dt;
-        }
-        else
-        {
-            xVelocity += -xAccel * dt;
-        }
+        xVelocity += -currentAccel * dt;
     }
     else if (!IsKeyDown(KEY_A) && IsKeyDown(KEY_D))
     {
-        if (falling)
-        {
-            xVelocity += airAccel * dt;
-        }
-        else
-        {
-            xVelocity += xAccel * dt;
-        }
+        xVelocity += currentAccel * dt;
     }
-    else // either A && D or !A && !D, apply xDeaccel
+    else // either A && D or !A && !D, so apply xDeaccel
     {
         if (xVelocity < 0.0f)
         {
@@ -65,16 +63,37 @@ void Player::UpdateVelocity(float dt)
         }
     }
 
-    // yVelocity += gravity * dt;
-
-    if (IsKeyPressed(KEY_W) && isGrounded)
+    // set rising if I can jump
+    if (IsKeyPressed(KEY_K) && isGrounded)
     {
+        preJumpY = body.y;
         yVelocity = -jumpSpeed;
+        rising = true;
     }
-    else
+
+    // if I'm rising, rise until I hit my limit
+    if (rising)
+    {
+        if (!IsKeyDown(KEY_K))
+        {
+            rising = false;
+        }
+
+        if (preJumpY - body.y >= maxJumpHeight)
+        {
+            rising = false;
+            yVelocity = 0.0f;
+        }
+    }
+
+    // if I stopped jumping early, fall faster
+    if (!rising && yVelocity < 0.0f)
+    {
+        yVelocity += gravity * relasedJumpEarlyScale * dt;
+    }
+    else // general gravity applied
     {
         yVelocity += gravity * dt;
-        falling = true;
     }
 
     // check maxXSpeed
@@ -118,27 +137,45 @@ void Player::ResolveXCollision(const Map &map, float dt)
     xColliding = false;
     Tile collidingTile;
 
-    for (int i = xStart; i < xEnd; i++)
+    // checking map bounds
+    if (!map.isInBounds(xStart, yStart))
     {
-        for (int j = yStart; j < yEnd; j++)
+        xColliding = true;
+        Rectangle temp = {-TILE_SIZE, body.y, TILE_SIZE, TILE_SIZE};
+        collidingTile = Tile(0, temp);
+    }
+    else if (!map.isInBounds(xEnd - 1, yEnd - 1))
+    {
+        xColliding = true;
+        Rectangle temp = {WINDOW_TILE_WIDTH * TILE_SIZE, body.y, TILE_SIZE, TILE_SIZE};
+        collidingTile = Tile(0, temp);
+    }
+    else
+    {
+        // checking general tiles
+        for (int i = xStart; i < xEnd; i++)
         {
-            const Tile &curTile = map.getTile(i, j);
-
-            collisionDebug.push_back(
-                "Tile (" + std::to_string(i) + ", " + std::to_string(j) + ")" +
-                " | ID: " + std::to_string(curTile.getID()) +
-                " | Position: (" +
-                std::to_string(curTile.getBody().x) + ", " +
-                std::to_string(curTile.getBody().y) + ")");
-
-            if (CheckCollisionRecs(projectedXBody, curTile.getBody()) && curTile.isSolid())
+            for (int j = yStart; j < yEnd; j++)
             {
-                xColliding = true;
-                collidingTile = curTile;
+                const Tile &curTile = map.getTile(i, j);
+
+                collisionDebug.push_back(
+                    "Tile (" + std::to_string(i) + ", " + std::to_string(j) + ")" +
+                    " | ID: " + std::to_string(curTile.getID()) +
+                    " | Position: (" +
+                    std::to_string(curTile.getBody().x) + ", " +
+                    std::to_string(curTile.getBody().y) + ")");
+
+                if (CheckCollisionRecs(projectedXBody, curTile.getBody()) && curTile.isSolid())
+                {
+                    xColliding = true;
+                    collidingTile = curTile;
+                }
             }
         }
     }
 
+    // if I collide, set my x
     if (xColliding)
     {
         if (xVelocity < 0.0f)
@@ -175,20 +212,38 @@ void Player::ResolveYCollision(const Map &map, float dt)
     yColliding = false;
     Tile collidingTile;
 
-    for (int i = xStart; i < xEnd; i++)
+    // checking map bonuds
+    if (!map.isInBounds(xStart, yStart))
     {
-        for (int j = yStart; j < yEnd; j++)
+        yColliding = true;
+        Rectangle temp = {body.x, -TILE_SIZE, TILE_SIZE, TILE_SIZE};
+        collidingTile = Tile(0, temp);
+    }
+    else if (!map.isInBounds(xEnd - 1, yEnd - 1))
+    {
+        yColliding = true;
+        Rectangle temp = {body.x, WINDOW_TILE_HEIGHT * TILE_SIZE, TILE_SIZE, TILE_SIZE};
+        collidingTile = Tile(0, temp);
+    }
+    else
+    {
+        // checking general tiles
+        for (int i = xStart; i < xEnd; i++)
         {
-            const Tile &curTile = map.getTile(i, j);
-
-            if (CheckCollisionRecs(projectedYBody, curTile.getBody()) && curTile.isSolid())
+            for (int j = yStart; j < yEnd; j++)
             {
-                yColliding = true;
-                collidingTile = curTile;
+                const Tile &curTile = map.getTile(i, j);
+
+                if (CheckCollisionRecs(projectedYBody, curTile.getBody()) && curTile.isSolid())
+                {
+                    yColliding = true;
+                    collidingTile = curTile;
+                }
             }
         }
     }
 
+    // if I collide, set my y
     if (yColliding)
     {
         if (yVelocity < 0.0f)
@@ -203,7 +258,6 @@ void Player::ResolveYCollision(const Map &map, float dt)
         }
 
         yVelocity = 0.0f;
-        falling = false;
     }
 }
 
@@ -214,9 +268,11 @@ void Player::Update(const Map &map)
 
     UpdateVelocity(dt);
 
+    // resolve x
     ResolveXCollision(map, dt);
     body.x += xVelocity * dt;
 
+    // resolve y
     isGrounded = false;
     hitCeiling = false;
 
@@ -248,7 +304,7 @@ void Player::DrawDebug() const
         32,
         WHITE);
 
-    int y = 220;
+    int y = 210;
 
     for (const std::string &line : collisionDebug)
     {

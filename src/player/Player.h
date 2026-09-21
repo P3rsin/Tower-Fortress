@@ -20,21 +20,25 @@ private:
 
     float xVelocity = 0.0f;
     const float maxXSpeed = 650.0f;
-    const float xAccel = 6250.0f;
+    const float xAccel = 7000.0f;
     const float airAccel = 3000.0f;
-    const float xDeaccel = 9000.0f;
+    const float xDeaccel = 7000.0f;
 
     float yVelocity = 0.0f;
-    const float maxFallSpeed = 1200.0f;
-    const float gravity = 2500.0f;
-    const float jumpSpeed = 900.0f;
+    const float maxFallSpeed = 1500.0f;
+    const float gravity = 3000.0f;
+    const float jumpSpeed = 1100.0f;
 
     bool xColliding = false;
     bool yColliding = false;
 
     bool isGrounded = false;
     bool hitCeiling = false;
-    bool falling = false;
+    bool rising = false;
+
+    float preJumpY = 0.0f;
+    float maxJumpHeight = 200.0f;
+    float relasedJumpEarlyScale = 2.5f;
 
     void UpdateVelocity(float dt);
     void ResolveXCollision(const Map &map, float dt);

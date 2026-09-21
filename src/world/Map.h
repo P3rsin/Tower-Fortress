@@ -10,6 +10,7 @@ public:
     void Load(const std::string &filePath);
     void Draw() const;
     const Tile &getTile(int tileX, int tileY) const;
+    bool isInBounds(int tileX, int tileY) const;
 
 private:
     std::string filePath;
