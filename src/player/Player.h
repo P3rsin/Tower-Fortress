@@ -34,6 +34,8 @@ private:
     bool hitCeiling = false;
     bool sustainingJump = false;
 
+    float coyoteTimer = 0.0f;
+    float jumpBufferTimer = 0.0f;
     float releasedJumpEarlyScale = 2.5f;
 
     void UpdateVelocity(float dt);

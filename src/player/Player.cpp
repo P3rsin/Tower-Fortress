@@ -66,11 +66,34 @@ void Player::UpdateVelocity(float dt)
         }
     }
 
-    // set sustainingJump if I can jump
-    if (IsKeyPressed(KEY_K) && isGrounded)
+    // coyote - player is allowed to jump
+    if (isGrounded)
+    {
+        coyoteTimer = COYOTE_TIME;
+    }
+    else
+    {
+        coyoteTimer -= dt;
+    }
+
+    // buffer time - player wants to jump
+    if (IsKeyPressed(KEY_K))
+    {
+        jumpBufferTimer = JUMP_BUFFER_TIME;
+    }
+    else
+    {
+        jumpBufferTimer -= dt;
+    }
+
+    // set sustainingJump if I'm within the range
+    if (jumpBufferTimer > 0.0f && coyoteTimer > 0.0f)
     {
         yVelocity = -jumpSpeed;
         sustainingJump = true;
+
+        jumpBufferTimer = 0.0f;
+        coyoteTimer = 0.0f;
     }
 
     // if I stop holding K, stop sustainingJump

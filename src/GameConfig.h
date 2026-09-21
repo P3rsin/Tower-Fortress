@@ -34,3 +34,7 @@ inline constexpr std::array<TileProperties, 2> TILE_PROPERTIES = {
 constexpr std::size_t TILE_ID_LENGTH = 2;
 constexpr std::size_t TILE_ID_SEPARATOR_LENGTH = 1;
 constexpr std::size_t TILE_ID_STRIDE = TILE_ID_LENGTH + TILE_ID_SEPARATOR_LENGTH;
+
+// PLAYER MOVEMENT
+constexpr float COYOTE_TIME = 0.05f;
+constexpr float JUMP_BUFFER_TIME = 0.05f;
