@@ -18,14 +18,17 @@ void Player::UpdateVelocity(float dt)
 {
     // pick the appropriate acceleration
     float currentAccel;
+    float currentDeaccel;
 
     if (isGrounded)
     {
         currentAccel = xAccel;
+        currentDeaccel = xDeaccel;
     }
     else
     {
         currentAccel = airAccel;
+        currentDeaccel = airDeaccel;
     }
 
     // I'm moving, so apply currentAccel based on input
@@ -41,55 +44,45 @@ void Player::UpdateVelocity(float dt)
     {
         if (xVelocity < 0.0f)
         {
-            if (xVelocity + xDeaccel * dt > 0.0f)
+            if (xVelocity + currentDeaccel * dt > 0.0f)
             {
                 xVelocity = 0.0f;
             }
             else
             {
-                xVelocity += xDeaccel * dt;
+                xVelocity += currentDeaccel * dt;
             }
         }
         else if (xVelocity > 0.0f)
         {
-            if (xVelocity - xDeaccel * dt < 0.0f)
+            if (xVelocity - currentDeaccel * dt < 0.0f)
             {
                 xVelocity = 0.0f;
             }
             else
             {
-                xVelocity -= xDeaccel * dt;
+                xVelocity += -currentDeaccel * dt;
             }
         }
     }
 
-    // set rising if I can jump
+    // set sustainingJump if I can jump
     if (IsKeyPressed(KEY_K) && isGrounded)
     {
-        preJumpY = body.y;
         yVelocity = -jumpSpeed;
-        rising = true;
+        sustainingJump = true;
     }
 
-    // if I'm rising, rise until I hit my limit
-    if (rising)
+    // if I stop holding K, stop sustainingJump
+    if (sustainingJump && !IsKeyDown(KEY_K))
     {
-        if (!IsKeyDown(KEY_K))
-        {
-            rising = false;
-        }
-
-        if (preJumpY - body.y >= maxJumpHeight)
-        {
-            rising = false;
-            yVelocity = 0.0f;
-        }
+        sustainingJump = false;
     }
 
     // if I stopped jumping early, fall faster
-    if (!rising && yVelocity < 0.0f)
+    if (!sustainingJump && yVelocity < 0.0f)
     {
-        yVelocity += gravity * relasedJumpEarlyScale * dt;
+        yVelocity += gravity * releasedJumpEarlyScale * dt;
     }
     else // general gravity applied
     {
@@ -116,17 +109,27 @@ void Player::UpdateVelocity(float dt)
     }
 }
 
-// keep in mind collidingTile refers to the last detected
-// collision, not the nearest, change eventually
 void Player::ResolveXCollision(const Map &map, float dt)
 {
-    collisionDebug.clear();
-
     Rectangle projectedXBody = {
         body.x + xVelocity * dt,
         body.y,
         body.width,
         body.height};
+
+    // checking map bounds
+    if (projectedXBody.x < 0.0f)
+    {
+        body.x = 0.0f;
+        xVelocity = 0.0f;
+        return;
+    }
+    else if (projectedXBody.x + projectedXBody.width > WINDOW_WIDTH)
+    {
+        body.x = WINDOW_WIDTH - body.width;
+        xVelocity = 0.0f;
+        return;
+    }
 
     int xStart = floor(projectedXBody.x / TILE_SIZE);
     int xEnd = ceil((projectedXBody.x + projectedXBody.width) / TILE_SIZE);
@@ -134,42 +137,39 @@ void Player::ResolveXCollision(const Map &map, float dt)
     int yStart = floor(projectedXBody.y / TILE_SIZE);
     int yEnd = ceil((projectedXBody.y + projectedXBody.height) / TILE_SIZE);
 
-    xColliding = false;
-    Tile collidingTile;
+    bool xColliding = false;
+    float blockingX = 0.0f; // represents the relevant edge
 
-    // checking map bounds
-    if (!map.isInBounds(xStart, yStart))
+    // otherwise, check interior tiles
+    for (int i = xStart; i < xEnd; i++)
     {
-        xColliding = true;
-        Rectangle temp = {-TILE_SIZE, body.y, TILE_SIZE, TILE_SIZE};
-        collidingTile = Tile(0, temp);
-    }
-    else if (!map.isInBounds(xEnd - 1, yEnd - 1))
-    {
-        xColliding = true;
-        Rectangle temp = {WINDOW_TILE_WIDTH * TILE_SIZE, body.y, TILE_SIZE, TILE_SIZE};
-        collidingTile = Tile(0, temp);
-    }
-    else
-    {
-        // checking general tiles
-        for (int i = xStart; i < xEnd; i++)
+        for (int j = yStart; j < yEnd; j++)
         {
-            for (int j = yStart; j < yEnd; j++)
+            const Tile &curTile = map.getTile(i, j);
+
+            if (!curTile.isSolid() || !CheckCollisionRecs(projectedXBody, curTile.getBody()))
             {
-                const Tile &curTile = map.getTile(i, j);
+                continue;
+            }
 
-                collisionDebug.push_back(
-                    "Tile (" + std::to_string(i) + ", " + std::to_string(j) + ")" +
-                    " | ID: " + std::to_string(curTile.getID()) +
-                    " | Position: (" +
-                    std::to_string(curTile.getBody().x) + ", " +
-                    std::to_string(curTile.getBody().y) + ")");
+            if (xVelocity < 0.0f)
+            {
+                float candidateEdge = curTile.getBody().x + curTile.getBody().width;
 
-                if (CheckCollisionRecs(projectedXBody, curTile.getBody()) && curTile.isSolid())
+                if (!xColliding || candidateEdge > blockingX)
                 {
+                    blockingX = candidateEdge;
                     xColliding = true;
-                    collidingTile = curTile;
+                }
+            }
+            else if (xVelocity > 0.0f)
+            {
+                float candidateEdge = curTile.getBody().x;
+
+                if (!xColliding || candidateEdge < blockingX)
+                {
+                    blockingX = candidateEdge;
+                    xColliding = true;
                 }
             }
         }
@@ -180,17 +180,15 @@ void Player::ResolveXCollision(const Map &map, float dt)
     {
         if (xVelocity < 0.0f)
         {
-            body.x = collidingTile.getBody().x + collidingTile.getBody().width;
+            body.x = blockingX;
         }
         else if (xVelocity > 0.0f)
         {
-            body.x = collidingTile.getBody().x - body.width;
+            body.x = blockingX - body.width;
         }
 
         xVelocity = 0.0f;
     }
-
-    Debug::Clear();
 }
 
 // keep in mind collidingTile refers to the last detected
@@ -203,41 +201,60 @@ void Player::ResolveYCollision(const Map &map, float dt)
         body.width,
         body.height};
 
+    // checking map bonuds
+    if (projectedYBody.y < 0.0f)
+    {
+        body.y = 0.0f;
+        yVelocity = 0.0f;
+        return;
+    }
+    else if (projectedYBody.y + projectedYBody.height > WINDOW_HEIGHT)
+    {
+        body.y = WINDOW_HEIGHT - body.height;
+        yVelocity = 0.0f;
+        isGrounded = true;
+        return;
+    }
+
     int xStart = floor(projectedYBody.x / TILE_SIZE);
     int xEnd = ceil((projectedYBody.x + projectedYBody.width) / TILE_SIZE);
 
     int yStart = floor(projectedYBody.y / TILE_SIZE);
     int yEnd = ceil((projectedYBody.y + projectedYBody.height) / TILE_SIZE);
 
-    yColliding = false;
-    Tile collidingTile;
+    bool yColliding = false;
+    float blockingY = 0.0f; // represents the relevant edge
 
-    // checking map bonuds
-    if (!map.isInBounds(xStart, yStart))
+    // otherwise, check interior tiles
+    for (int i = xStart; i < xEnd; i++)
     {
-        yColliding = true;
-        Rectangle temp = {body.x, -TILE_SIZE, TILE_SIZE, TILE_SIZE};
-        collidingTile = Tile(0, temp);
-    }
-    else if (!map.isInBounds(xEnd - 1, yEnd - 1))
-    {
-        yColliding = true;
-        Rectangle temp = {body.x, WINDOW_TILE_HEIGHT * TILE_SIZE, TILE_SIZE, TILE_SIZE};
-        collidingTile = Tile(0, temp);
-    }
-    else
-    {
-        // checking general tiles
-        for (int i = xStart; i < xEnd; i++)
+        for (int j = yStart; j < yEnd; j++)
         {
-            for (int j = yStart; j < yEnd; j++)
-            {
-                const Tile &curTile = map.getTile(i, j);
+            const Tile &curTile = map.getTile(i, j);
 
-                if (CheckCollisionRecs(projectedYBody, curTile.getBody()) && curTile.isSolid())
+            if (!curTile.isSolid() || !CheckCollisionRecs(projectedYBody, curTile.getBody()))
+            {
+                continue;
+            }
+
+            if (yVelocity < 0.0f)
+            {
+                float candidateEdge = curTile.getBody().y + curTile.getBody().height;
+
+                if (!yColliding || candidateEdge > blockingY)
                 {
+                    blockingY = candidateEdge;
                     yColliding = true;
-                    collidingTile = curTile;
+                }
+            }
+            else if (yVelocity > 0.0f)
+            {
+                float candidateEdge = curTile.getBody().y;
+
+                if (!yColliding || candidateEdge < blockingY)
+                {
+                    blockingY = candidateEdge;
+                    yColliding = true;
                 }
             }
         }
@@ -248,12 +265,12 @@ void Player::ResolveYCollision(const Map &map, float dt)
     {
         if (yVelocity < 0.0f)
         {
-            body.y = collidingTile.getBody().y + collidingTile.getBody().height;
+            body.y = blockingY;
             hitCeiling = true;
         }
         else if (yVelocity > 0.0f)
         {
-            body.y = collidingTile.getBody().y - body.height;
+            body.y = blockingY - body.height;
             isGrounded = true;
         }
 
