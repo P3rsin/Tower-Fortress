@@ -58,7 +58,7 @@ int main()
     camera.rotation = 0.0f;
     camera.zoom = 1.0f;
 
-    Vector2 deadZoneOffset = {camera.offset.x / 2.0f, camera.offset.y / 2.0f}; // 450, 300
+    //Vector2 deadZoneOffset = {camera.offset.x / 2.0f, camera.offset.y / 2.0f}; // 450, 300
 
     // end of camera stuff
 
@@ -71,24 +71,6 @@ int main()
             clampCameraX(player.getCenter().x, camera.offset.x, map.getWidth()),
             clampCameraY(player.getCenter().y, camera.offset.y, map.getHeight())};
 
-        int startX = (camera.target.x - camera.offset.x) / TILE_SIZE;
-        int endX = (camera.target.x + camera.offset.x) / TILE_SIZE;
-
-        int startY = (camera.target.y - camera.offset.y) / TILE_SIZE;
-        int endY = (camera.target.y + camera.offset.y) / TILE_SIZE;
-
-        startX = std::max(0, startX);
-        startY = std::max(0, startY);
-
-        endX = std::min(map.getWidth() - 1, endX);
-        endY = std::min(map.getHeight() - 1, endY);
-
-        std::cout << "startX: " << startX
-                  << " | endX: " << endX
-                  << " | startY: " << startY
-                  << " | endY: " << endY
-                  << '\n';
-
         // drawing
         BeginDrawing();
         ClearBackground(RAYWHITE);
@@ -96,7 +78,7 @@ int main()
         // World
         BeginMode2D(camera);
 
-        map.Draw(startX, endX, startY, endY);
+        map.Draw(camera);
         player.Draw();
 
         EndMode2D();
@@ -107,6 +89,7 @@ int main()
         EndDrawing();
     }
 
+    map.Unload();
     CloseWindow();
 
     return 0;

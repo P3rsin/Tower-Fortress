@@ -25,11 +25,6 @@ int Tile::getID() const
     return id;
 }
 
-const Color &Tile::getColor() const
-{
-    return TILE_PROPERTIES[id].color;
-}
-
 bool Tile::isSolid() const {
     return TILE_PROPERTIES[id].isSolid;
 }

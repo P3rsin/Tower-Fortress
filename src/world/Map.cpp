@@ -7,6 +7,11 @@
 #include "world/Tile.h"
 #include "debug/Debug.h"
 
+void Map::Unload()
+{
+    UnloadTexture(tileSheet);
+}
+
 void Map::LoadMapIDs()
 {
     width = 0;
@@ -59,6 +64,7 @@ void Map::CreateTiles()
 
 void Map::Load(const std::string &filePath)
 {
+    tileSheet = LoadTexture("assets/desert-ruins.png");
     this->filePath = filePath;
 
     LoadMapIDs();
@@ -73,15 +79,39 @@ void Map::DrawDebug(const Tile &tile) const
     DrawRectangleLinesEx(tile.getBody(), 1.0f, PURPLE);
 }
 
-void Map::Draw(int startX, int endX, int startY, int endY) const
+void Map::Draw(const Camera2D &camera) const
 {
-    for (int i = startX; i <= endX; i++)
+    int startX = (camera.target.x - camera.offset.x) / TILE_SIZE;
+    int endX = (camera.target.x + camera.offset.x) / TILE_SIZE;
+
+    int startY = (camera.target.y - camera.offset.y) / TILE_SIZE;
+    int endY = (camera.target.y + camera.offset.y) / TILE_SIZE;
+
+    startX = std::max(0, startX);
+    startY = std::max(0, startY);
+
+    endX = std::min(width - 1, endX);
+    endY = std::min(height - 1, endY);
+
+    for (int j = startY; j <= endY; j++)
     {
-        for (int j = startY; j <= endY; j++)
+        for (int i = startX; i <= endX; i++)
         {
             const Tile &tile = tileList[(j * width) + i];
-            DrawRectangleRec(tile.getBody(), tile.getColor());
-            DrawDebug(tile);
+
+            Rectangle source = TILE_PROPERTIES[tile.getID()].sourceRect;
+            Rectangle destination = tile.getBody();
+
+            DrawTexturePro(
+                tileSheet,
+                source,
+                destination,
+                {0.0f, 0.0f},
+                0.0f,
+                WHITE);
+
+            // DrawRectangleRec(tile.getBody(), tile.getColor());
+            // DrawDebug(tile);
         }
     }
 }
