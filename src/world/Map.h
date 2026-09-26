@@ -7,8 +7,8 @@
 class Map
 {
 public:
-    void Load(const std::string &filePath, int width, int height);
-    void Draw() const;
+    void Load(const std::string &filePath);
+    void Draw(int startX, int endX, int startY, int endY) const;
     const Tile &getTile(int tileX, int tileY) const;
     // bool isInBounds(int tileX, int tileY) const;
 

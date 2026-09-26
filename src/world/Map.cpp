@@ -9,6 +9,9 @@
 
 void Map::LoadMapIDs()
 {
+    width = 0;
+    height = 0;
+
     tileIDData.clear();
     std::ifstream file(filePath);
 
@@ -22,6 +25,12 @@ void Map::LoadMapIDs()
 
     while (getline(file, line))
     {
+        if (width == 0)
+        {
+            width = line.size() / TILE_ID_STRIDE;
+        }
+
+        height++;
         tileIDData += line;
     }
 }
@@ -44,20 +53,18 @@ void Map::CreateTiles()
             static_cast<float>(TILE_SIZE),
             static_cast<float>(TILE_SIZE)};
 
-        // std::cout << "Converting: [" << curTileID << "]\n";
         tileList.emplace_back(std::stoi(curTileID), rect);
     }
 }
 
-void Map::Load(const std::string &filePath, int width, int height)
+void Map::Load(const std::string &filePath)
 {
     this->filePath = filePath;
-    this->width = width;
-    this->height = height;
+
+    LoadMapIDs();
 
     totalTiles = width * height;
 
-    LoadMapIDs();
     CreateTiles();
 }
 
@@ -66,12 +73,16 @@ void Map::DrawDebug(const Tile &tile) const
     DrawRectangleLinesEx(tile.getBody(), 1.0f, PURPLE);
 }
 
-void Map::Draw() const
+void Map::Draw(int startX, int endX, int startY, int endY) const
 {
-    for (const Tile &tile : tileList)
+    for (int i = startX; i <= endX; i++)
     {
-        DrawRectangleRec(tile.getBody(), tile.getColor());
-        DrawDebug(tile);
+        for (int j = startY; j <= endY; j++)
+        {
+            const Tile &tile = tileList[(j * width) + i];
+            DrawRectangleRec(tile.getBody(), tile.getColor());
+            DrawDebug(tile);
+        }
     }
 }
 
