@@ -13,6 +13,8 @@ public:
     void Update(const Map &map);
     void Draw() const;
     void DrawDebug() const;
+    Rectangle getBody() const;
+    Vector2 getCenter() const;
 
 private:
     Rectangle body;
@@ -28,7 +30,7 @@ private:
     float yVelocity = 0.0f;
     const float maxFallSpeed = 1500.0f;
     const float gravity = 3000.0f;
-    const float jumpSpeed = 1100.0f;
+    const float jumpSpeed = 1150.0f;
 
     bool isGrounded = false;
     bool hitCeiling = false;

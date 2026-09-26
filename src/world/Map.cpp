@@ -30,10 +30,10 @@ void Map::CreateTiles()
 {
     tileList.clear();
 
-    for (size_t i = 0; i < TOTAL_NUM_TILES; i++)
+    for (size_t i = 0; i < totalTiles; i++)
     {
-        const int tileX = i % WINDOW_TILE_WIDTH;
-        const int tileY = i / WINDOW_TILE_WIDTH;
+        const int tileX = i % width;
+        const int tileY = i / width;
 
         const size_t retrievalIdx = i * TILE_ID_STRIDE;
         const std::string curTileID = tileIDData.substr(retrievalIdx, TILE_ID_LENGTH);
@@ -44,13 +44,19 @@ void Map::CreateTiles()
             static_cast<float>(TILE_SIZE),
             static_cast<float>(TILE_SIZE)};
 
+        // std::cout << "Converting: [" << curTileID << "]\n";
         tileList.emplace_back(std::stoi(curTileID), rect);
     }
 }
 
-void Map::Load(const std::string &filePath)
+void Map::Load(const std::string &filePath, int width, int height)
 {
     this->filePath = filePath;
+    this->width = width;
+    this->height = height;
+
+    totalTiles = width * height;
+
     LoadMapIDs();
     CreateTiles();
 }
@@ -71,10 +77,21 @@ void Map::Draw() const
 
 const Tile &Map::getTile(int tileX, int tileY) const
 {
-    return tileList[(tileY * WINDOW_TILE_WIDTH) + tileX];
+    return tileList[(tileY * width) + tileX];
 }
 
-bool Map::isInBounds(int tileX, int tileY) const
+int Map::getWidth() const
 {
-    return tileX >= 0 && tileX < WINDOW_TILE_WIDTH && tileY >= 0 && tileY < WINDOW_TILE_HEIGHT;
+    return width;
 }
+
+int Map::getHeight() const
+{
+    return height;
+}
+
+// unused
+// bool Map::isInBounds(int tileX, int tileY) const
+// {
+//     return tileX >= 0 && tileX < width && tileY >= 0 && tileY < height;
+// }

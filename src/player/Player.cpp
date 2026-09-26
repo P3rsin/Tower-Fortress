@@ -1,5 +1,6 @@
 #include <vector>
 #include <cmath>
+#include <algorithm>
 #include <raylib.h>
 
 #include "GameConfig.h"
@@ -140,6 +141,8 @@ void Player::ResolveXCollision(const Map &map, float dt)
         body.width,
         body.height};
 
+    int mapPixelWidth = map.getWidth() * TILE_SIZE;
+
     // checking map bounds
     if (projectedXBody.x < 0.0f)
     {
@@ -147,9 +150,9 @@ void Player::ResolveXCollision(const Map &map, float dt)
         xVelocity = 0.0f;
         return;
     }
-    else if (projectedXBody.x + projectedXBody.width > WINDOW_WIDTH)
+    else if (projectedXBody.x + projectedXBody.width > mapPixelWidth)
     {
-        body.x = WINDOW_WIDTH - body.width;
+        body.x = mapPixelWidth - body.width;
         xVelocity = 0.0f;
         return;
     }
@@ -214,8 +217,6 @@ void Player::ResolveXCollision(const Map &map, float dt)
     }
 }
 
-// keep in mind collidingTile refers to the last detected
-// collision, not the nearest, change eventually
 void Player::ResolveYCollision(const Map &map, float dt)
 {
     Rectangle projectedYBody = {
@@ -224,6 +225,8 @@ void Player::ResolveYCollision(const Map &map, float dt)
         body.width,
         body.height};
 
+    int mapPixelHeight = map.getHeight() * TILE_SIZE;
+
     // checking map bonuds
     if (projectedYBody.y < 0.0f)
     {
@@ -231,9 +234,9 @@ void Player::ResolveYCollision(const Map &map, float dt)
         yVelocity = 0.0f;
         return;
     }
-    else if (projectedYBody.y + projectedYBody.height > WINDOW_HEIGHT)
+    else if (projectedYBody.y + projectedYBody.height > mapPixelHeight)
     {
-        body.y = WINDOW_HEIGHT - body.height;
+        body.y = mapPixelHeight - body.height;
         yVelocity = 0.0f;
         isGrounded = true;
         return;
@@ -318,6 +321,16 @@ void Player::Update(const Map &map)
 
     ResolveYCollision(map, dt);
     body.y += yVelocity * dt;
+}
+
+Rectangle Player::getBody() const
+{
+    return body;
+}
+
+Vector2 Player::getCenter() const
+{
+    return {body.x + body.width / 2.0f, body.y + body.height / 2.0f};
 }
 
 void Player::Draw() const
