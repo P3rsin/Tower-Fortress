@@ -9,7 +9,6 @@ public:
 
     const Rectangle &getBody() const;
     int getID() const;
-    const Color &getColor() const;
     bool isSolid() const;
 
 private:

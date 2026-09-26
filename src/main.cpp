@@ -1,6 +1,4 @@
 #include <raylib.h>
-#include <iostream>
-#include <algorithm>
 
 #include "GameConfig.h"
 #include "player/Player.h"
@@ -45,7 +43,7 @@ int main()
     SetTargetFPS(60);
 
     Map map;
-    map.Load("assets/mapdata.txt"); // 64 - wide, 23 - tall
+    map.Load("assets/mapdata.txt");
 
     Player player(100, 100, 80, 80, BRIGHTYELLOW);
 
@@ -57,8 +55,6 @@ int main()
     camera.target = player.getCenter();
     camera.rotation = 0.0f;
     camera.zoom = 1.0f;
-
-    //Vector2 deadZoneOffset = {camera.offset.x / 2.0f, camera.offset.y / 2.0f}; // 450, 300
 
     // end of camera stuff
 

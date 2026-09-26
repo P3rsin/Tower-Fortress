@@ -1,11 +1,11 @@
 #include <fstream>
 #include <iostream>
+#include <algorithm>
 #include <raylib.h>
 
 #include "GameConfig.h"
 #include "world/Map.h"
 #include "world/Tile.h"
-#include "debug/Debug.h"
 
 void Map::Unload()
 {
@@ -110,7 +110,6 @@ void Map::Draw(const Camera2D &camera) const
                 0.0f,
                 WHITE);
 
-            // DrawRectangleRec(tile.getBody(), tile.getColor());
             // DrawDebug(tile);
         }
     }
@@ -130,9 +129,3 @@ int Map::getHeight() const
 {
     return height;
 }
-
-// unused
-// bool Map::isInBounds(int tileX, int tileY) const
-// {
-//     return tileX >= 0 && tileX < width && tileY >= 0 && tileY < height;
-// }

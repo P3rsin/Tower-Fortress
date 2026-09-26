@@ -43,6 +43,4 @@ private:
     void UpdateVelocity(float dt);
     void ResolveXCollision(const Map &map, float dt);
     void ResolveYCollision(const Map &map, float dt);
-
-    std::vector<std::string> collisionDebug;
 };

@@ -7,7 +7,6 @@
 #include "world/Map.h"
 #include "world/Tile.h"
 #include "player/Player.h"
-#include "debug/Debug.h"
 
 Player::Player(float startX, float startY, float width, float height, Color color)
     : body{startX, startY, width, height},
@@ -356,18 +355,4 @@ void Player::DrawDebug() const
         10, 10,
         32,
         WHITE);
-
-    int y = 210;
-
-    for (const std::string &line : collisionDebug)
-    {
-        DrawText(
-            line.c_str(),
-            10,
-            y,
-            20,
-            WHITE);
-
-        y += 25;
-    }
 }

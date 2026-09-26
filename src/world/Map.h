@@ -11,7 +11,6 @@ public:
     void Draw(const Camera2D &camera) const;
     const Tile &getTile(int tileX, int tileY) const;
     void Unload();
-    // bool isInBounds(int tileX, int tileY) const;
 
     int getWidth() const;
     int getHeight() const;
