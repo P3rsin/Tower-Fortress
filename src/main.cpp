@@ -44,6 +44,7 @@ int main()
 
     Map map;
     map.Load("assets/mapdata.txt");
+    //map.Load("assets/soliditycheckmap.txt");
 
     Player player(100, 100, 80, 80, BRIGHTYELLOW);
 
