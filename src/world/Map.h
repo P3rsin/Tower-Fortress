@@ -8,6 +8,7 @@ class Map
 {
 public:
     void Load(const std::string &filePath);
+    void Save();
     void Draw(const Camera2D &camera) const;
 
     const Tile &getTile(int tileX, int tileY) const;

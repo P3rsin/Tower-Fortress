@@ -5,6 +5,13 @@
 #include "player/Player.h"
 #include "world/Map.h"
 #include "world/Tile.h"
+#include <stdexcept>
+
+enum class EditorMode
+{
+    Normal,
+    Insert
+};
 
 float clampCameraX(float playerX, float halfViewWidth, int mapWidth)
 {
@@ -40,23 +47,36 @@ float clampCameraY(float playerY, float halfViewHeight, int mapHeight)
 
 void editorCameraUpdate(Camera2D &camera)
 {
+    float moveSpeed = 10 / camera.zoom;
+
     if (IsKeyDown(KEY_A))
     {
-        camera.target.x -= 10;
+        camera.target.x -= moveSpeed;
     }
     else if (IsKeyDown(KEY_D))
     {
-        camera.target.x += 10;
+        camera.target.x += moveSpeed;
     }
 
     if (IsKeyDown(KEY_W))
     {
-        camera.target.y -= 10;
+        camera.target.y -= moveSpeed;
     }
     else if (IsKeyDown(KEY_S))
     {
-        camera.target.y += 10;
+        camera.target.y += moveSpeed;
     }
+
+    if (IsKeyDown(KEY_Q))
+    {
+        camera.zoom -= 0.02f;
+    }
+    else if (IsKeyDown(KEY_E))
+    {
+        camera.zoom += 0.02f;
+    }
+
+    camera.zoom = std::clamp(camera.zoom, 0.4f, 2.0f);
 }
 
 int main()
@@ -65,7 +85,9 @@ int main()
     SetTargetFPS(60);
 
     std::string gameMode = "playerMode";
-    Vector2 selectedTileIdx = {0, 0};
+    std::string typedText;
+    TileCoord selectedTile = {0, 0};
+    EditorMode editorMode = EditorMode::Normal;
 
     Map map;
     map.Load("assets/map-one.txt");
@@ -90,8 +112,9 @@ int main()
         }
         else if (IsKeyPressed(KEY_Y) && gameMode == "editorMode")
         {
-            // reset any highlight
-            map.highlightTile(selectedTileIdx.x, selectedTileIdx.y, false);
+            map.highlightTile(selectedTile.x, selectedTile.y, false);
+            camera.zoom = 1.0f; // reset any highlight and zoom
+
             gameMode = "playerMode";
         }
 
@@ -110,23 +133,70 @@ int main()
         }
         else if (gameMode == "editorMode")
         {
-            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+            if (IsKeyPressed(KEY_I))
             {
-                // reset previous highlight
-                map.highlightTile(selectedTileIdx.x, selectedTileIdx.y, false);
+                editorMode = EditorMode::Insert;
+            }
+            else if (IsKeyPressed(KEY_ENTER))
+            {
+                try
+                {
+                    int inputID = std::stoi(typedText);
+                    map.setTileID(selectedTile.x, selectedTile.y, inputID);
+                }
+                catch (const std::invalid_argument &)
+                {
+                    // typedText was not a valid number
+                }
+                catch (const std::out_of_range &)
+                {
+                    // number was too large/small for int
+                }
 
-                Vector2 mouseScreen = GetMousePosition();
-                Vector2 mousePosition = GetScreenToWorld2D(mouseScreen, camera);
-
-                int tileX = mousePosition.x / TILE_SIZE;
-                int tileY = mousePosition.y / TILE_SIZE;
-
-                selectedTileIdx = {tileX, tileY};
-
-                map.highlightTile(selectedTileIdx.x, selectedTileIdx.y, true);
+                typedText.clear();
+                editorMode = EditorMode::Normal;
             }
 
-            editorCameraUpdate(camera);
+            if (editorMode == EditorMode::Normal)
+            {
+                if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+                {
+                    // reset previous highlight
+                    map.highlightTile(selectedTile.x, selectedTile.y, false);
+
+                    Vector2 mouseScreen = GetMousePosition();
+                    Vector2 mousePosition = GetScreenToWorld2D(mouseScreen, camera);
+
+                    int tileX = mousePosition.x / TILE_SIZE;
+                    int tileY = mousePosition.y / TILE_SIZE;
+
+                    selectedTile = {tileX, tileY};
+
+                    map.highlightTile(selectedTile.x, selectedTile.y, true);
+                }
+
+                editorCameraUpdate(camera);
+
+                if (IsKeyPressed(KEY_P))
+                {
+                    map.Save();
+                }
+            }
+            else if (editorMode == EditorMode::Insert)
+            {
+                int key = GetCharPressed();
+
+                while (key > 0)
+                {
+                    typedText += static_cast<char>(key);
+                    key = GetCharPressed();
+                }
+
+                if (IsKeyPressed(KEY_BACKSPACE) && !typedText.empty())
+                {
+                    typedText.pop_back();
+                }
+            }
         }
 
         // drawing
@@ -143,8 +213,9 @@ int main()
 
         // UI stuff
         DrawText(gameMode.c_str(), 20, 20, 28, WHITE);
-        DrawText(TextFormat("[%.0f:%.0f]", selectedTileIdx.x, selectedTileIdx.y),
-                 20, 50, 28, WHITE);
+        DrawText(TextFormat("[%d:%d]", selectedTile.x, selectedTile.y), 20, 50, 28, WHITE);
+        DrawText(typedText.c_str(), 20, 80, 28, WHITE);
+
         EndDrawing();
     }
 

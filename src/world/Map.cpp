@@ -1,5 +1,6 @@
 #include <fstream>
 #include <iostream>
+#include <fstream>
 #include <algorithm>
 #include <raylib.h>
 
@@ -74,6 +75,35 @@ void Map::Load(const std::string &filePath)
     CreateTiles();
 }
 
+void Map::Save()
+{
+    std::ofstream file("assets/savedMap.txt");
+
+    int rowCount = 0;
+
+    for (const Tile &tile : tileList)
+    {
+        if (tile.getID() < 10)
+        {
+            file << '0' << tile.getID() << ' ';
+        }
+        else
+        {
+            file << tile.getID() << ' ';
+        }
+
+        rowCount++;
+
+        if (rowCount == width)
+        {
+            file << '\n';
+            rowCount = 0;
+        }
+    }
+
+    file.close();
+}
+
 void Map::DrawDebug(const Tile &tile) const
 {
     DrawRectangleLinesEx(tile.getBody(), 3.0f, BRIGHTCYAN);
@@ -81,11 +111,14 @@ void Map::DrawDebug(const Tile &tile) const
 
 void Map::Draw(const Camera2D &camera) const
 {
-    int startX = (camera.target.x - camera.offset.x) / TILE_SIZE;
-    int endX = (camera.target.x + camera.offset.x) / TILE_SIZE;
+    float halfViewWidth = camera.offset.x / camera.zoom;
+    float halfViewHeight = camera.offset.y / camera.zoom;
 
-    int startY = (camera.target.y - camera.offset.y) / TILE_SIZE;
-    int endY = (camera.target.y + camera.offset.y) / TILE_SIZE;
+    int startX = (camera.target.x - halfViewWidth) / TILE_SIZE;
+    int endX = (camera.target.x + halfViewWidth) / TILE_SIZE;
+
+    int startY = (camera.target.y - halfViewHeight) / TILE_SIZE;
+    int endY = (camera.target.y + halfViewHeight) / TILE_SIZE;
 
     startX = std::max(0, startX);
     startY = std::max(0, startY);

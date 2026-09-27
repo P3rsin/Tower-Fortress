@@ -1,6 +1,12 @@
 #pragma once
 #include <raylib.h>
 
+struct TileCoord
+{
+    int x;
+    int y;
+};
+
 class Tile
 {
 public:
