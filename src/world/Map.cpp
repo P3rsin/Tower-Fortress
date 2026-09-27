@@ -58,7 +58,7 @@ void Map::CreateTiles()
             static_cast<float>(TILE_SIZE),
             static_cast<float>(TILE_SIZE)};
 
-        tileList.emplace_back(std::stoi(curTileID), rect);
+        tileList.emplace_back(std::stoi(curTileID), rect, false);
     }
 }
 
@@ -76,7 +76,7 @@ void Map::Load(const std::string &filePath)
 
 void Map::DrawDebug(const Tile &tile) const
 {
-    DrawRectangleLinesEx(tile.getBody(), 1.0f, PURPLE);
+    DrawRectangleLinesEx(tile.getBody(), 3.0f, BRIGHTCYAN);
 }
 
 void Map::Draw(const Camera2D &camera) const
@@ -110,7 +110,10 @@ void Map::Draw(const Camera2D &camera) const
                 0.0f,
                 WHITE);
 
-            // DrawDebug(tile);
+            if (tile.getHighlighted())
+            {
+                DrawDebug(tile);
+            }
         }
     }
 }
@@ -118,6 +121,21 @@ void Map::Draw(const Camera2D &camera) const
 const Tile &Map::getTile(int tileX, int tileY) const
 {
     return tileList[(tileY * width) + tileX];
+}
+
+Tile &Map::getTileRef(int tileX, int tileY)
+{
+    return tileList[(tileY * width) + tileX];
+}
+
+void Map::setTileID(int tileX, int tileY, int id)
+{
+    tileList[(tileY * width) + tileX].setID(id);
+}
+
+void Map::highlightTile(int tileX, int tileY, bool value)
+{
+    tileList[(tileY * width) + tileX].setHighlighted(value);
 }
 
 int Map::getWidth() const

@@ -9,7 +9,12 @@ class Map
 public:
     void Load(const std::string &filePath);
     void Draw(const Camera2D &camera) const;
+
     const Tile &getTile(int tileX, int tileY) const;
+    Tile &getTileRef(int tileX, int tileY);
+
+    void setTileID(int tileX, int tileY, int id);
+    void highlightTile(int tileX, int tileY, bool value);
     void Unload();
 
     int getWidth() const;
