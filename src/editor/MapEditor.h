@@ -1,21 +1,35 @@
 #pragma once
+#include <optional>
 #include "world/Tile.h"
 #include "world/Map.h"
+
+struct TileSelection
+{
+    TileCoord start;
+    TileCoord end;
+};
 
 class MapEditor
 {
 public:
-    MapEditor(const Texture2D &tileSheet);
+    MapEditor(const Map &map);
 
-    void highlightTiles(TileCoord start, TileCoord end) const;
+    void correctCoord(TileCoord &coordinate);
+    void highlightTiles(const Map &map) const;
+    void drawPallete();
     void drawDebug(const Tile &tile) const;
 
     void update(const Camera2D &camera);
     void save(const Map &map);
+
+    void draw(const Map &map);
     void drawUI();
 
 private:
     Texture2D tileSheet;
 
-    TileCoord selectedTile = {-1, -1};
+    int mapWidth;
+    int mapHeight;
+
+    std::optional<TileSelection> selection;
 };

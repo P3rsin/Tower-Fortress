@@ -2,15 +2,16 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
+#include <cmath>
 #include <raylib.h>
 
 #include "GameConfig.h"
 #include "world/Map.h"
 #include "world/Tile.h"
 
-Map::Map(const std::string &filePath, const Texture2D &tileSheet) 
+Map::Map(const std::string &filePath)
 {
-    Load(filePath, tileSheet);
+    Load(filePath);
 }
 
 void Map::Unload()
@@ -64,13 +65,13 @@ void Map::CreateTiles()
             static_cast<float>(TILE_SIZE),
             static_cast<float>(TILE_SIZE)};
 
-        tileList.emplace_back(std::stoi(curTileID), rect, false);
+        tileList.emplace_back(std::stoi(curTileID), rect);
     }
 }
 
-void Map::Load(const std::string &filePath, const Texture2D &tileSheet)
+void Map::Load(const std::string &filePath)
 {
-    this->tileSheet = tileSheet;
+    tileSheet = LoadTexture("assets/desert-ruins.png");
     this->filePath = filePath;
 
     LoadMapIDs();
@@ -117,12 +118,12 @@ void Map::Draw(const Camera2D &camera) const
     }
 }
 
-const Tile &Map::getTile(int tileX, int tileY) const
+const Tile &Map::getTile(TileCoord coordinate) const
 {
-    return tileList[(tileY * width) + tileX];
+    return tileList[(coordinate.y * width) + coordinate.x];
 }
 
-const std::vector<Tile> &Map::getTileList() const 
+const std::vector<Tile> &Map::getTileList() const
 {
     return tileList;
 }
@@ -145,4 +146,9 @@ int Map::getWidth() const
 int Map::getHeight() const
 {
     return height;
+}
+
+const Texture2D &Map::getTileSheet() const
+{
+    return tileSheet;
 }

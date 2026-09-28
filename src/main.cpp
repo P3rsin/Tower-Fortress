@@ -16,10 +16,9 @@ int main()
     SetTargetFPS(60);
 
     GameState gameState = GameState::PlayerFocused;
-    Texture2D tileSheet = LoadTexture("assets/desert-ruins.png");
 
-    Map map("assets/map-one.txt", tileSheet);
-    MapEditor mapEditor(tileSheet);
+    Map map("assets/map-one.txt");
+    MapEditor mapEditor(map);
     Player player(100, 100, 80, 80, BRIGHTYELLOW);
     CameraController cameraC(player.getCenter());
 
@@ -56,6 +55,12 @@ int main()
         BeginMode2D(cameraC.getCamera());
 
         map.Draw(cameraC.getCamera());
+
+        if (gameState == GameState::MapEditor)
+        {
+            mapEditor.draw(map);
+        }
+
         player.Draw();
 
         EndMode2D();

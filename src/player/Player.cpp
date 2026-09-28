@@ -170,7 +170,7 @@ void Player::ResolveXCollision(const Map &map, float dt)
     {
         for (int j = yStart; j < yEnd; j++)
         {
-            const Tile &curTile = map.getTile(i, j);
+            const Tile &curTile = map.getTile(TileCoord{i, j});
 
             if (!curTile.isSolid() || !CheckCollisionRecs(projectedXBody, curTile.getBody()))
             {
@@ -255,7 +255,7 @@ void Player::ResolveYCollision(const Map &map, float dt)
     {
         for (int j = yStart; j < yEnd; j++)
         {
-            const Tile &curTile = map.getTile(i, j);
+            const Tile &curTile = map.getTile(TileCoord{i, j});
 
             if (!curTile.isSolid() || !CheckCollisionRecs(projectedYBody, curTile.getBody()))
             {

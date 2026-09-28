@@ -7,13 +7,12 @@
 class Map
 {
 public:
-    Map(const std::string &filePath, const Texture2D &tileSheet);
+    Map(const std::string &filePath);
 
-    void Load(const std::string &filePath, const Texture2D &tileSheet);
-    void Save();
+    void Load(const std::string &filePath);
     void Draw(const Camera2D &camera) const;
 
-    const Tile &getTile(int tileX, int tileY) const;
+    const Tile &getTile(TileCoord coordinate) const;
     const std::vector<Tile> &getTileList() const;
     Tile &getTileRef(int tileX, int tileY);
 
@@ -22,6 +21,8 @@ public:
 
     int getWidth() const;
     int getHeight() const;
+
+    const Texture2D &getTileSheet() const;
 
 private:
     std::string filePath;

@@ -5,6 +5,11 @@ struct TileCoord
 {
     int x;
     int y;
+
+    bool operator==(const TileCoord &other) const
+    {
+        return x == other.x && y == other.y;
+    }
 };
 
 class Tile
