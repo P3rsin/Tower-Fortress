@@ -8,6 +8,11 @@
 #include "world/Map.h"
 #include "world/Tile.h"
 
+Map::Map(const std::string &filePath, const Texture2D &tileSheet) 
+{
+    Load(filePath, tileSheet);
+}
+
 void Map::Unload()
 {
     UnloadTexture(tileSheet);
@@ -63,9 +68,9 @@ void Map::CreateTiles()
     }
 }
 
-void Map::Load(const std::string &filePath)
+void Map::Load(const std::string &filePath, const Texture2D &tileSheet)
 {
-    tileSheet = LoadTexture("assets/desert-ruins.png");
+    this->tileSheet = tileSheet;
     this->filePath = filePath;
 
     LoadMapIDs();

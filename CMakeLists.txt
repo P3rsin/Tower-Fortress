@@ -26,6 +26,8 @@ add_executable(TowerFortress
     src/world/Tile.cpp
     
     src/debug/Debug.cpp
+
+    src/camera/CameraController.cpp
 )
 
 target_include_directories(TowerFortress PRIVATE

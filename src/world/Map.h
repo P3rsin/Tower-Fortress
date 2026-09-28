@@ -7,7 +7,9 @@
 class Map
 {
 public:
-    void Load(const std::string &filePath);
+    Map(const std::string &filePath, const Texture2D &tileSheet);
+
+    void Load(const std::string &filePath, const Texture2D &tileSheet);
     void Save();
     void Draw(const Camera2D &camera) const;
 

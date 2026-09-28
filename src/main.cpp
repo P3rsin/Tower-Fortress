@@ -1,11 +1,13 @@
 #include <raylib.h>
 #include <algorithm>
+#include <stdexcept>
 
 #include "GameConfig.h"
+#include "GameState.h"
 #include "player/Player.h"
 #include "world/Map.h"
 #include "world/Tile.h"
-#include <stdexcept>
+#include "camera/CameraController.h"
 
 enum class EditorMode
 {
@@ -13,125 +15,45 @@ enum class EditorMode
     Insert
 };
 
-float clampCameraX(float playerX, float halfViewWidth, int mapWidth)
-{
-    if (playerX - halfViewWidth < 0)
-    {
-        return halfViewWidth;
-    }
-    else if (playerX + halfViewWidth > mapWidth * TILE_SIZE)
-    {
-        return mapWidth * TILE_SIZE - halfViewWidth;
-    }
-    else
-    {
-        return playerX;
-    }
-}
-
-float clampCameraY(float playerY, float halfViewHeight, int mapHeight)
-{
-    if (playerY - halfViewHeight < 0)
-    {
-        return halfViewHeight;
-    }
-    else if (playerY + halfViewHeight > mapHeight * TILE_SIZE)
-    {
-        return mapHeight * TILE_SIZE - halfViewHeight;
-    }
-    else
-    {
-        return playerY;
-    }
-}
-
-void editorCameraUpdate(Camera2D &camera)
-{
-    float moveSpeed = 10 / camera.zoom;
-
-    if (IsKeyDown(KEY_A))
-    {
-        camera.target.x -= moveSpeed;
-    }
-    else if (IsKeyDown(KEY_D))
-    {
-        camera.target.x += moveSpeed;
-    }
-
-    if (IsKeyDown(KEY_W))
-    {
-        camera.target.y -= moveSpeed;
-    }
-    else if (IsKeyDown(KEY_S))
-    {
-        camera.target.y += moveSpeed;
-    }
-
-    if (IsKeyDown(KEY_Q))
-    {
-        camera.zoom -= 0.02f;
-    }
-    else if (IsKeyDown(KEY_E))
-    {
-        camera.zoom += 0.02f;
-    }
-
-    camera.zoom = std::clamp(camera.zoom, 0.4f, 2.0f);
-}
-
 int main()
 {
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Tower Fortress");
     SetTargetFPS(60);
 
-    std::string gameMode = "playerMode";
-    std::string typedText;
-    TileCoord selectedTile = {0, 0};
+    GameState gameState = GameState::PlayerFocused;
     EditorMode editorMode = EditorMode::Normal;
 
-    Map map;
-    map.Load("assets/map-one.txt");
+    std::string typedText;
+    TileCoord selectedTile = {0, 0};
 
+    Texture2D tileSheet = LoadTexture("assets/desert-ruins.png");
+
+    Map map("assets/map-one.txt", tileSheet);
     Player player(100, 100, 80, 80, BRIGHTYELLOW);
-
-    // leaving camera stuff in here for now
-    Camera2D camera{};
-
-    camera.offset = {WINDOW_WIDTH / 2.0f, WINDOW_HEIGHT / 2.0f}; // 900, 600
-    camera.target = player.getCenter();
-    camera.rotation = 0.0f;
-    camera.zoom = 1.0f;
-    // end of camera stuff
+    CameraController cameraC(player.getCenter());
 
     while (!WindowShouldClose())
     {
         // set gamemode logic
-        if (IsKeyPressed(KEY_Y) && gameMode == "playerMode")
+        if (IsKeyPressed(KEY_Y) && gameState == GameState::PlayerFocused)
         {
-            gameMode = "editorMode";
+            gameState = GameState::MapEditor;
         }
-        else if (IsKeyPressed(KEY_Y) && gameMode == "editorMode")
+        else if (IsKeyPressed(KEY_Y) && gameState == GameState::MapEditor)
         {
             map.highlightTile(selectedTile.x, selectedTile.y, false);
-            camera.zoom = 1.0f; // reset any highlight and zoom
+            cameraC.setZoom(1.0f);
 
-            gameMode = "playerMode";
+            gameState = GameState::PlayerFocused;
         }
 
         // update based on gamemode
-        if (gameMode == "playerMode")
+        if (gameState == GameState::PlayerFocused)
         {
             player.Update(map);
-
-            // update the camera
-            float halfViewWidth = camera.offset.x / camera.zoom;
-            float halfViewHeight = camera.offset.y / camera.zoom;
-
-            camera.target = Vector2{
-                clampCameraX(player.getCenter().x, halfViewWidth, map.getWidth()),
-                clampCameraY(player.getCenter().y, halfViewHeight, map.getHeight())};
+            cameraC.entityFocus(player.getCenter(), map.getWidth(), map.getHeight());
         }
-        else if (gameMode == "editorMode")
+        else if (gameState == GameState::MapEditor)
         {
             if (IsKeyPressed(KEY_I))
             {
@@ -165,7 +87,7 @@ int main()
                     map.highlightTile(selectedTile.x, selectedTile.y, false);
 
                     Vector2 mouseScreen = GetMousePosition();
-                    Vector2 mousePosition = GetScreenToWorld2D(mouseScreen, camera);
+                    Vector2 mousePosition = GetScreenToWorld2D(mouseScreen, cameraC.getCamera());
 
                     int tileX = mousePosition.x / TILE_SIZE;
                     int tileY = mousePosition.y / TILE_SIZE;
@@ -175,7 +97,7 @@ int main()
                     map.highlightTile(selectedTile.x, selectedTile.y, true);
                 }
 
-                editorCameraUpdate(camera);
+                cameraC.freeMove();
 
                 if (IsKeyPressed(KEY_P))
                 {
@@ -204,17 +126,27 @@ int main()
         ClearBackground(DARKCHARCOAL);
 
         // World
-        BeginMode2D(camera);
+        BeginMode2D(cameraC.getCamera());
 
-        map.Draw(camera);
+        map.Draw(cameraC.getCamera());
         player.Draw();
 
         EndMode2D();
 
         // UI stuff
-        DrawText(gameMode.c_str(), 20, 20, 28, WHITE);
-        DrawText(TextFormat("[%d:%d]", selectedTile.x, selectedTile.y), 20, 50, 28, WHITE);
-        DrawText(typedText.c_str(), 20, 80, 28, WHITE);
+        if (gameState == GameState::MapEditor)
+        {
+            DrawText(TextFormat("[%d:%d]", selectedTile.x, selectedTile.y), 20, 50, 28, WHITE);
+            DrawText(typedText.c_str(), 20, 80, 28, WHITE);
+
+            DrawTexturePro(
+                tileSheet,
+                TILE_PROPERTIES[0].sourceRect,
+                Rectangle{0, 200, TILE_SIZE, TILE_SIZE},
+                {0.0f, 0.0f},
+                0.0f,
+                WHITE);
+        }
 
         EndDrawing();
     }
