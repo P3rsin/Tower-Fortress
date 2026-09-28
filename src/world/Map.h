@@ -14,10 +14,10 @@ public:
     void Draw(const Camera2D &camera) const;
 
     const Tile &getTile(int tileX, int tileY) const;
+    const std::vector<Tile> &getTileList() const;
     Tile &getTileRef(int tileX, int tileY);
 
     void setTileID(int tileX, int tileY, int id);
-    void highlightTile(int tileX, int tileY, bool value);
     void Unload();
 
     int getWidth() const;
@@ -36,6 +36,4 @@ private:
 
     void LoadMapIDs();
     void CreateTiles();
-
-    void DrawDebug(const Tile &tile) const;
 };

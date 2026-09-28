@@ -80,40 +80,6 @@ void Map::Load(const std::string &filePath, const Texture2D &tileSheet)
     CreateTiles();
 }
 
-void Map::Save()
-{
-    std::ofstream file("assets/savedMap.txt");
-
-    int rowCount = 0;
-
-    for (const Tile &tile : tileList)
-    {
-        if (tile.getID() < 10)
-        {
-            file << '0' << tile.getID() << ' ';
-        }
-        else
-        {
-            file << tile.getID() << ' ';
-        }
-
-        rowCount++;
-
-        if (rowCount == width)
-        {
-            file << '\n';
-            rowCount = 0;
-        }
-    }
-
-    file.close();
-}
-
-void Map::DrawDebug(const Tile &tile) const
-{
-    DrawRectangleLinesEx(tile.getBody(), 3.0f, BRIGHTCYAN);
-}
-
 void Map::Draw(const Camera2D &camera) const
 {
     float halfViewWidth = camera.offset.x / camera.zoom;
@@ -147,11 +113,6 @@ void Map::Draw(const Camera2D &camera) const
                 {0.0f, 0.0f},
                 0.0f,
                 WHITE);
-
-            if (tile.getHighlighted())
-            {
-                DrawDebug(tile);
-            }
         }
     }
 }
@@ -159,6 +120,11 @@ void Map::Draw(const Camera2D &camera) const
 const Tile &Map::getTile(int tileX, int tileY) const
 {
     return tileList[(tileY * width) + tileX];
+}
+
+const std::vector<Tile> &Map::getTileList() const 
+{
+    return tileList;
 }
 
 Tile &Map::getTileRef(int tileX, int tileY)
@@ -169,11 +135,6 @@ Tile &Map::getTileRef(int tileX, int tileY)
 void Map::setTileID(int tileX, int tileY, int id)
 {
     tileList[(tileY * width) + tileX].setID(id);
-}
-
-void Map::highlightTile(int tileX, int tileY, bool value)
-{
-    tileList[(tileY * width) + tileX].setHighlighted(value);
 }
 
 int Map::getWidth() const

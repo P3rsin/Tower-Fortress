@@ -5,15 +5,13 @@
 
 Tile::Tile()
     : id(-1),
-      body{0.0f, 0.0f, 0.0f, 0.0f},
-      highlighted(false)
+      body{0.0f, 0.0f, 0.0f, 0.0f}
 {
 }
 
-Tile::Tile(int id, Rectangle body, bool highlighted)
+Tile::Tile(int id, Rectangle body)
     : id(id),
-      body(body),
-      highlighted(highlighted)
+      body(body)
 {
 }
 
@@ -30,16 +28,6 @@ int Tile::getID() const
 void Tile::setID(int id)
 {
     this->id = id;
-}
-
-bool Tile::getHighlighted() const
-{
-    return highlighted;
-}
-
-void Tile::setHighlighted(bool isHighlighted)
-{
-    this->highlighted = isHighlighted;
 }
 
 bool Tile::isSolid() const
