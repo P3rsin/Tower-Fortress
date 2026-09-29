@@ -10,12 +10,15 @@ public:
     Map(const std::string &filePath);
     ~Map();
 
+    // avoid attempting to delete the same texture
+    Map(const Map &) = delete;
+    Map &operator=(const Map &) = delete;
+
     void load(const std::string &filePath);
     void draw(const Camera2D &camera) const;
 
     const Tile &getTile(TileCoord coordinate) const;
     const std::vector<Tile> &getTileList() const;
-    Tile &getTileRef(int tileX, int tileY);
 
     void setTileID(int tileX, int tileY, int id);
 

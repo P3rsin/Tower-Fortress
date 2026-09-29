@@ -77,7 +77,7 @@ void CameraController::freeMove()
     camera.zoom = std::clamp(camera.zoom, 0.4f, 2.0f);
 }
 
-void CameraController::entityFocus(Vector2 target, int mapWidth, int mapHeight)
+void CameraController::focusOn(Vector2 target, int mapWidth, int mapHeight)
 {
     float halfViewWidth = camera.offset.x / camera.zoom;
     float halfViewHeight = camera.offset.y / camera.zoom;
@@ -92,7 +92,7 @@ void CameraController::setZoom(float zoom)
     camera.zoom = zoom;
 }
 
-Camera2D &CameraController::getCamera()
+const Camera2D &CameraController::getCamera() const
 {
     return camera;
 }

@@ -36,7 +36,7 @@ int main()
         if (gameState == GameState::PlayerFocused)
         {
             player.update(map);
-            cameraC.entityFocus(player.getCenter(), map.getWidth(), map.getHeight());
+            cameraC.focusOn(player.getCenter(), map.getWidth(), map.getHeight());
         }
         else if (gameState == GameState::MapEditor)
         {
@@ -55,7 +55,7 @@ int main()
 
         if (gameState == GameState::MapEditor)
         {
-            mapEditor.draw(map);
+            mapEditor.draw();
         }
 
         player.draw();

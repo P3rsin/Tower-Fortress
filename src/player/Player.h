@@ -39,7 +39,7 @@ private:
     float jumpBufferTimer = 0.0f;
     float releasedJumpEarlyScale = 2.5f;
 
-    void UpdateVelocity(float dt);
-    void ResolveXCollision(const Map &map, float dt);
-    void ResolveYCollision(const Map &map, float dt);
+    void updateVelocity(float dt);
+    void resolveXCollision(const Map &map, float dt);
+    void resolveYCollision(const Map &map, float dt);
 };

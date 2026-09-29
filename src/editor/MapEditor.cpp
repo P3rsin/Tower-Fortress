@@ -6,20 +6,18 @@
 #include "world/Map.h"
 #include "GameConfig.h"
 
-MapEditor::MapEditor(const Map &map)
+MapEditor::MapEditor(Map &map)
+    : map(map)
 {
-    this->tileSheet = map.getTileSheet();
-    this->mapWidth = map.getWidth();
-    this->mapHeight = map.getHeight();
 }
 
-void MapEditor::clampCoordinate(TileCoord &coordinate)
+void MapEditor::clampCoordinate(TileCoord &coordinate) const
 {
-    coordinate.x = std::clamp(coordinate.x, 0, mapWidth - 1);
-    coordinate.y = std::clamp(coordinate.y, 0, mapWidth - 1);
+    coordinate.x = std::clamp(coordinate.x, 0, map.getWidth() - 1);
+    coordinate.y = std::clamp(coordinate.y, 0, map.getHeight() - 1);
 }
 
-void MapEditor::highlightTiles(const Map &map) const
+void MapEditor::highlightTiles() const
 {
     const int xStart = std::min(selection->start.x, selection->end.x);
     const int xEnd = std::max(selection->start.x, selection->end.x);
@@ -27,13 +25,13 @@ void MapEditor::highlightTiles(const Map &map) const
     const int yStart = std::min(selection->start.y, selection->end.y);
     const int yEnd = std::max(selection->start.y, selection->end.y);
 
-    Rectangle totalHighlight = {
-        xStart * TILE_SIZE,
-        yStart * TILE_SIZE,
-        (xEnd - xStart + 1) * TILE_SIZE,
-        (yEnd - yStart + 1) * TILE_SIZE};
+    Rectangle selectionRect = {
+        static_cast<float>(xStart * TILE_SIZE),
+        static_cast<float>(yStart * TILE_SIZE),
+        static_cast<float>((xEnd - xStart + 1) * TILE_SIZE),
+        static_cast<float>((yEnd - yStart + 1) * TILE_SIZE)};
 
-    DrawRectangleLinesEx(totalHighlight, 4.0f, BRIGHT_CYAN);
+    DrawRectangleLinesEx(selectionRect, 4.0f, BRIGHT_CYAN);
 
     for (int y = yStart; y <= yEnd; ++y)
     {
@@ -45,7 +43,7 @@ void MapEditor::highlightTiles(const Map &map) const
     }
 }
 
-void MapEditor::drawPalette()
+void MapEditor::drawPalette() const
 {
 }
 
@@ -77,15 +75,15 @@ void MapEditor::update(const Camera2D &camera)
     }
 }
 
-void MapEditor::draw(const Map &map)
+void MapEditor::draw() const
 {
     if (selection)
     {
-        highlightTiles(map);
+        highlightTiles();
     }
 }
 
-void MapEditor::drawUI()
+void MapEditor::drawUI() const
 {
     if (selection)
     {
@@ -94,7 +92,7 @@ void MapEditor::drawUI()
     }
 
     DrawTexturePro(
-        tileSheet,
+        map.getTileSheet(),
         TILE_PROPERTIES[0].sourceRect,
         Rectangle{0, 200, TILE_SIZE, TILE_SIZE},
         {0.0f, 0.0f},
@@ -102,7 +100,7 @@ void MapEditor::drawUI()
         WHITE);
 }
 
-void MapEditor::save(const Map &map)
+void MapEditor::save() const
 {
     std::ofstream file("assets/savedMap.txt");
 

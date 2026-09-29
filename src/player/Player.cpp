@@ -13,7 +13,7 @@ Player::Player(float startX, float startY, float width, float height, Color colo
 {
 }
 
-void Player::UpdateVelocity(float dt)
+void Player::updateVelocity(float dt)
 {
     // pick the appropriate acceleration
     float currentAccel;
@@ -131,7 +131,7 @@ void Player::UpdateVelocity(float dt)
     }
 }
 
-void Player::ResolveXCollision(const Map &map, float dt)
+void Player::resolveXCollision(const Map &map, float dt)
 {
     Rectangle projectedXBody = {
         body.x + xVelocity * dt,
@@ -215,7 +215,7 @@ void Player::ResolveXCollision(const Map &map, float dt)
     }
 }
 
-void Player::ResolveYCollision(const Map &map, float dt)
+void Player::resolveYCollision(const Map &map, float dt)
 {
     Rectangle projectedYBody = {
         body.x,
@@ -307,17 +307,17 @@ void Player::update(const Map &map)
     float dt = GetFrameTime();
     dt = std::min(dt, 0.05f); // in case of a frame hitch
 
-    UpdateVelocity(dt);
+    updateVelocity(dt);
 
     // resolve x
-    ResolveXCollision(map, dt);
+    resolveXCollision(map, dt);
     body.x += xVelocity * dt;
 
     // resolve y
     isGrounded = false;
     hitCeiling = false;
 
-    ResolveYCollision(map, dt);
+    resolveYCollision(map, dt);
     body.y += yVelocity * dt;
 }
 

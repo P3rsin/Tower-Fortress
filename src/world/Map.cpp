@@ -126,11 +126,6 @@ const std::vector<Tile> &Map::getTileList() const
     return tileList;
 }
 
-Tile &Map::getTileRef(int tileX, int tileY)
-{
-    return tileList[(tileY * width) + tileX];
-}
-
 void Map::setTileID(int tileX, int tileY, int id)
 {
     tileList[(tileY * width) + tileX].setID(id);

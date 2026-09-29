@@ -13,22 +13,18 @@ struct TileSelection
 class MapEditor
 {
 public:
-    MapEditor(const Map &map);
+    explicit MapEditor(Map &map);
 
-    void drawPalette();
+    void drawPalette() const;
     void update(const Camera2D &camera);
-    void save(const Map &map);
-    void draw(const Map &map);
-    void drawUI();
+    void save() const;
+    void draw() const;
+    void drawUI() const;
 
 private:
-    Texture2D tileSheet;
-
-    int mapWidth;
-    int mapHeight;
-
+    Map &map;
     std::optional<TileSelection> selection;
 
-    void clampCoordinate(TileCoord &coordinate);
-    void highlightTiles(const Map &map) const;
+    void clampCoordinate(TileCoord &coordinate) const;
+    void highlightTiles() const;
 };

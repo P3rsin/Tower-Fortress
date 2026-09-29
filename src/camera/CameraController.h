@@ -1,6 +1,5 @@
 #pragma once
 #include <raylib.h>
-#include "GameConfig.h"
 
 class CameraController
 {
@@ -9,10 +8,10 @@ public:
 
     void setZoom(float zoom);
 
-    void entityFocus(Vector2 playerCenter, int mapWidth, int mapHeight);
+    void focusOn(Vector2 playerCenter, int mapWidth, int mapHeight);
     void freeMove();
 
-    Camera2D &getCamera();
+    const Camera2D &getCamera() const;
 
 private:
     Camera2D camera;
