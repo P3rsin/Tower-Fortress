@@ -3,12 +3,6 @@
 #include "GameConfig.h"
 #include "world/Tile.h"
 
-Tile::Tile()
-    : id(-1),
-      body{0.0f, 0.0f, 0.0f, 0.0f}
-{
-}
-
 Tile::Tile(int id, Rectangle body)
     : id(id),
       body(body)

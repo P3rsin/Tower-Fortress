@@ -1,6 +1,4 @@
 #pragma once
-#include <string>
-#include <vector>
 #include <raylib.h>
 
 #include "world/Map.h"
@@ -10,9 +8,10 @@ class Player
 public:
     Player(float startX, float startY, float width, float height, Color color);
 
-    void Update(const Map &map);
-    void Draw() const;
-    void DrawDebug() const;
+    void update(const Map &map);
+    void draw() const;
+    void drawDebug() const;
+
     Rectangle getBody() const;
     Vector2 getCenter() const;
 

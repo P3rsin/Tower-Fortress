@@ -1,4 +1,3 @@
-#include <vector>
 #include <cmath>
 #include <algorithm>
 #include <raylib.h>
@@ -303,7 +302,7 @@ void Player::ResolveYCollision(const Map &map, float dt)
     }
 }
 
-void Player::Update(const Map &map)
+void Player::update(const Map &map)
 {
     float dt = GetFrameTime();
     dt = std::min(dt, 0.05f); // in case of a frame hitch
@@ -332,7 +331,7 @@ Vector2 Player::getCenter() const
     return {body.x + body.width / 2.0f, body.y + body.height / 2.0f};
 }
 
-void Player::Draw() const
+void Player::draw() const
 {
     DrawRectangle(
         static_cast<int>(std::round(body.x)),
@@ -342,7 +341,7 @@ void Player::Draw() const
         color);
 }
 
-void Player::DrawDebug() const
+void Player::drawDebug() const
 {
     DrawText(
         TextFormat(

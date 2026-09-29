@@ -8,16 +8,16 @@ class Map
 {
 public:
     Map(const std::string &filePath);
+    ~Map();
 
-    void Load(const std::string &filePath);
-    void Draw(const Camera2D &camera) const;
+    void load(const std::string &filePath);
+    void draw(const Camera2D &camera) const;
 
     const Tile &getTile(TileCoord coordinate) const;
     const std::vector<Tile> &getTileList() const;
     Tile &getTileRef(int tileX, int tileY);
 
     void setTileID(int tileX, int tileY, int id);
-    void Unload();
 
     int getWidth() const;
     int getHeight() const;
@@ -35,6 +35,6 @@ private:
     int height;
     int totalTiles;
 
-    void LoadMapIDs();
-    void CreateTiles();
+    void loadMapIDs();
+    void createTiles();
 };

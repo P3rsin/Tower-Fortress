@@ -1,4 +1,6 @@
 #include <fstream>
+#include <algorithm>
+#include <cmath>
 
 #include "MapEditor.h"
 #include "world/Map.h"
@@ -11,70 +13,19 @@ MapEditor::MapEditor(const Map &map)
     this->mapHeight = map.getHeight();
 }
 
-void MapEditor::drawDebug(const Tile &tile) const
+void MapEditor::clampCoordinate(TileCoord &coordinate)
 {
-    DrawRectangleLinesEx(tile.getBody(), 1.0f, RED);
-}
-
-void MapEditor::correctCoord(TileCoord &coordinate)
-{
-    if (coordinate.x < 0 || coordinate.x > mapWidth - 1)
-    {
-        if (std::abs(0 - coordinate.x) < std::abs(mapWidth - 1 - coordinate.x))
-        {
-            coordinate.x = 0;
-        }
-        else
-        {
-            coordinate.x = mapWidth - 1;
-        }
-    }
-
-    if (coordinate.y < 0 || coordinate.y > mapHeight - 1)
-    {
-        if (std::abs(0 - coordinate.y) < std::abs(mapHeight - 1 - coordinate.y))
-        {
-            coordinate.y = 0;
-        }
-        else
-        {
-            coordinate.y = mapHeight - 1;
-        }
-    }
+    coordinate.x = std::clamp(coordinate.x, 0, mapWidth - 1);
+    coordinate.y = std::clamp(coordinate.y, 0, mapWidth - 1);
 }
 
 void MapEditor::highlightTiles(const Map &map) const
 {
-    int xStart;
-    int yStart;
+    const int xStart = std::min(selection->start.x, selection->end.x);
+    const int xEnd = std::max(selection->start.x, selection->end.x);
 
-    int xEnd;
-    int yEnd;
-
-    const TileCoord &selectedTile = selection->start;
-    const TileCoord &selectedTile2 = selection->end;
-
-    if (selectedTile.x <= selectedTile2.x)
-    {
-        xStart = selectedTile.x;
-        xEnd = selectedTile2.x;
-    }
-    else
-    {
-        xStart = selectedTile2.x;
-        xEnd = selectedTile.x;
-    }
-
-    if (selectedTile.y <= selectedTile2.y)
-    {
-        yStart = selectedTile.y;
-        yEnd = selectedTile2.y;
-    }
-    else
-    {
-        yStart = selectedTile2.y;
-        yEnd = selectedTile.y;
-    }
+    const int yStart = std::min(selection->start.y, selection->end.y);
+    const int yEnd = std::max(selection->start.y, selection->end.y);
 
     Rectangle totalHighlight = {
         xStart * TILE_SIZE,
@@ -82,19 +33,19 @@ void MapEditor::highlightTiles(const Map &map) const
         (xEnd - xStart + 1) * TILE_SIZE,
         (yEnd - yStart + 1) * TILE_SIZE};
 
-    DrawRectangleLinesEx(totalHighlight, 4.0f, BRIGHTCYAN);
+    DrawRectangleLinesEx(totalHighlight, 4.0f, BRIGHT_CYAN);
 
-    for (int i = xStart; i <= xEnd; i++)
+    for (int y = yStart; y <= yEnd; ++y)
     {
-        for (int j = yStart; j <= yEnd; j++)
+        for (int x = xStart; x <= xEnd; ++x)
         {
-            const Tile &tile = map.getTile(TileCoord{i, j});
-            DrawRectangleLinesEx(tile.getBody(), 1.0f, BRIGHTCYAN);
+            const Tile &tile = map.getTile(TileCoord{x, y});
+            DrawRectangleLinesEx(tile.getBody(), 1.0f, BRIGHT_CYAN);
         }
     }
 }
 
-void MapEditor::drawPallete()
+void MapEditor::drawPalette()
 {
 }
 
@@ -109,7 +60,7 @@ void MapEditor::update(const Camera2D &camera)
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !IsKeyDown(KEY_LEFT_SHIFT))
     {
         TileCoord coord{tileX, tileY};
-        correctCoord(coord);
+        clampCoordinate(coord);
 
         selection = TileSelection{coord, coord};
     }
@@ -119,7 +70,7 @@ void MapEditor::update(const Camera2D &camera)
         if (selection)
         {
             TileCoord coord{tileX, tileY};
-            correctCoord(coord);
+            clampCoordinate(coord);
 
             selection->end = coord;
         }

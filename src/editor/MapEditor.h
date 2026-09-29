@@ -1,5 +1,6 @@
 #pragma once
 #include <optional>
+
 #include "world/Tile.h"
 #include "world/Map.h"
 
@@ -14,14 +15,9 @@ class MapEditor
 public:
     MapEditor(const Map &map);
 
-    void correctCoord(TileCoord &coordinate);
-    void highlightTiles(const Map &map) const;
-    void drawPallete();
-    void drawDebug(const Tile &tile) const;
-
+    void drawPalette();
     void update(const Camera2D &camera);
     void save(const Map &map);
-
     void draw(const Map &map);
     void drawUI();
 
@@ -32,4 +28,7 @@ private:
     int mapHeight;
 
     std::optional<TileSelection> selection;
+
+    void clampCoordinate(TileCoord &coordinate);
+    void highlightTiles(const Map &map) const;
 };

@@ -1,12 +1,9 @@
 #include <raylib.h>
-#include <algorithm>
-#include <stdexcept>
 
 #include "GameConfig.h"
 #include "GameState.h"
 #include "player/Player.h"
 #include "world/Map.h"
-#include "world/Tile.h"
 #include "camera/CameraController.h"
 #include "editor/MapEditor.h"
 
@@ -19,7 +16,7 @@ int main()
 
     Map map("assets/map-one.txt");
     MapEditor mapEditor(map);
-    Player player(100, 100, 80, 80, BRIGHTYELLOW);
+    Player player(100, 100, 80, 80, BRIGHT_YELLOW);
     CameraController cameraC(player.getCenter());
 
     while (!WindowShouldClose())
@@ -38,7 +35,7 @@ int main()
         // update based on gamemode
         if (gameState == GameState::PlayerFocused)
         {
-            player.Update(map);
+            player.update(map);
             cameraC.entityFocus(player.getCenter(), map.getWidth(), map.getHeight());
         }
         else if (gameState == GameState::MapEditor)
@@ -49,19 +46,19 @@ int main()
 
         // drawing
         BeginDrawing();
-        ClearBackground(DARKCHARCOAL);
+        ClearBackground(DARK_CHARCOAL);
 
         // World
         BeginMode2D(cameraC.getCamera());
 
-        map.Draw(cameraC.getCamera());
+        map.draw(cameraC.getCamera());
 
         if (gameState == GameState::MapEditor)
         {
             mapEditor.draw(map);
         }
 
-        player.Draw();
+        player.draw();
 
         EndMode2D();
 
@@ -74,7 +71,6 @@ int main()
         EndDrawing();
     }
 
-    map.Unload();
     CloseWindow();
 
     return 0;

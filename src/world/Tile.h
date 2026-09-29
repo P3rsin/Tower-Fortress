@@ -15,7 +15,6 @@ struct TileCoord
 class Tile
 {
 public:
-    Tile();
     Tile(int id, Rectangle body);
 
     const Rectangle &getBody() const;

@@ -25,8 +25,6 @@ add_executable(TowerFortress
     src/world/Map.cpp   
     src/world/Tile.cpp
     
-    src/debug/Debug.cpp
-
     src/camera/CameraController.cpp
     src/editor/MapEditor.cpp
 )
@@ -36,3 +34,11 @@ target_include_directories(TowerFortress PRIVATE
 )
 
 target_link_libraries(TowerFortress PRIVATE raylib)
+
+if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(TowerFortress PRIVATE
+        -Wall
+        -Wextra
+        -Wpedantic
+    )
+endif()

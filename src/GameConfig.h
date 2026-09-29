@@ -14,9 +14,9 @@ constexpr int WINDOW_WIDTH = WINDOW_TILE_WIDTH * TILE_SIZE;
 constexpr int WINDOW_HEIGHT = WINDOW_TILE_HEIGHT * TILE_SIZE;
 
 // CUSTOM COLORS
-constexpr Color BRIGHTYELLOW = {255, 220, 0, 255};
-constexpr Color DARKCHARCOAL = {30, 30, 30, 255};
-constexpr Color BRIGHTCYAN = {0, 255, 255, 255}; 
+constexpr Color BRIGHT_YELLOW = {255, 220, 0, 255};
+constexpr Color DARK_CHARCOAL = {30, 30, 30, 255};
+constexpr Color BRIGHT_CYAN = {0, 255, 255, 255}; 
 
 // MAP FILE PARSING - based on txt formatting used
 constexpr std::size_t TILE_ID_LENGTH = 2;

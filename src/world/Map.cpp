@@ -1,8 +1,6 @@
-#include <fstream>
 #include <iostream>
 #include <fstream>
 #include <algorithm>
-#include <cmath>
 #include <raylib.h>
 
 #include "GameConfig.h"
@@ -11,15 +9,15 @@
 
 Map::Map(const std::string &filePath)
 {
-    Load(filePath);
+    load(filePath);
 }
 
-void Map::Unload()
+Map::~Map()
 {
     UnloadTexture(tileSheet);
 }
 
-void Map::LoadMapIDs()
+void Map::loadMapIDs()
 {
     width = 0;
     height = 0;
@@ -47,7 +45,7 @@ void Map::LoadMapIDs()
     }
 }
 
-void Map::CreateTiles()
+void Map::createTiles()
 {
     tileList.clear();
 
@@ -69,19 +67,19 @@ void Map::CreateTiles()
     }
 }
 
-void Map::Load(const std::string &filePath)
+void Map::load(const std::string &filePath)
 {
     tileSheet = LoadTexture("assets/desert-ruins.png");
     this->filePath = filePath;
 
-    LoadMapIDs();
+    loadMapIDs();
 
     totalTiles = width * height;
 
-    CreateTiles();
+    createTiles();
 }
 
-void Map::Draw(const Camera2D &camera) const
+void Map::draw(const Camera2D &camera) const
 {
     float halfViewWidth = camera.offset.x / camera.zoom;
     float halfViewHeight = camera.offset.y / camera.zoom;
