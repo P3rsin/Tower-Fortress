@@ -1,8 +1,8 @@
 # Tower Fortress
 
-**Tower Fortress** is an in-progress 2D platformer built in C++17 with [raylib](https://www.raylib.com/).
+**Tower Fortress** is an in-progress 2D tile-based platformer built in **C++17** with **raylib**.
 
-The project is currently focused on developing the underlying systems for a tile-based platformer while giving me experience designing and maintaining a multi-file C++ codebase. Current work includes player movement, tile collision, map loading, camera movement, and tilesheet-based rendering.
+The project is primarily a hands-on software engineering and game-development project. Current development has focused on building reusable systems for player movement, tile collision, map loading and rendering, camera control, and an integrated map editor.
 
 ## Current Features
 
@@ -13,60 +13,97 @@ The project is currently focused on developing the underlying systems for a tile
 - Maximum horizontal and falling speeds
 - Gravity-based vertical movement
 - Variable-height jumping
-  - press `K` to jump
-  - hold `K` for a higher jump
-  - release `K` early for a shorter jump
-- Coyote time for slightly delayed jumps after leaving a platform
-- Jump buffering for jump inputs made shortly before landing
+  - Press `K` to jump
+  - Hold `K` for a higher jump
+  - Release `K` early for a shorter jump
+- Coyote time
+- Jump buffering
 - Frame-rate-independent movement using delta time
 - Delta-time clamping to reduce the effect of large frame hitches
 
 ### Collision
 
-- Axis-separated horizontal and vertical collision detection
+- Axis-separated horizontal and vertical collision resolution
 - Collision against solid map tiles
+- Projected-position collision checks
 - Nearest blocking-surface selection when multiple tiles overlap the player's projected position
 - Collision against world boundaries
-- Ground and ceiling collision state tracking
-- Collision queries limited to tiles surrounding the player's projected position rather than the entire map
+- Ground and ceiling state tracking
+- Collision checks limited to nearby tiles rather than scanning the entire map
 
-### Tile Map
+### Tile Maps
 
 - Text-based tile-map loading
-- Map dimensions determined from the loaded map data
-- Tile IDs mapped to gameplay and rendering properties
+- Map dimensions determined from map data
+- Tile IDs mapped to rendering and collision properties
 - Data-driven tile solidity
-- Tile maps stored internally as a one-dimensional row-major tile array
-- Maps can extend beyond the dimensions of the game window
+- Maps stored internally as a one-dimensional row-major tile array
+- Maps can be substantially larger than the game window
+- Multiple map files can be loaded using the same map system
 
-### Rendering
+### Tilesheet Rendering
 
-- Tilesheet-based map rendering using a single raylib `Texture2D`
-- Individual tile graphics selected using source rectangles within the tilesheet
-- Tile IDs used to reference both sprite and solidity information
-- 16x16 source sprites scaled to the game's world tile size
-- Rendering limited to tiles within the camera's visible area
+- Tile rendering from a single raylib `Texture2D`
+- Individual tile graphics defined using source rectangles within a tilesheet
+- Tile IDs used to look up both sprite and collision properties
+- 16x16 source sprites scaled into the game's 100x100 world tiles
+- Only tiles inside the camera's visible region are submitted for rendering
 
-### Camera
+### Camera System
 
-- Player-following `Camera2D`
-- Camera movement through maps larger than the viewport
+- Dedicated `CameraController`
+- Player-following camera
 - Camera clamping at map boundaries
+- Zoom-aware visible-area calculations
+- Independent free-camera controls for map editing
+- Adjustable editor zoom
 - Separation between world-space rendering and screen-space UI
 
-### Build System
+### Map Editor
 
-- CMake build configuration
-- C++17
-- raylib 6.0 retrieved automatically through CMake `FetchContent`
+Tower Fortress includes an in-game map editor that is currently under active development.
+
+The current editor supports:
+
+- Switching between normal gameplay and editor mode
+- Independent camera movement while editing
+- Camera zooming
+- Converting mouse screen coordinates into world and tile coordinates
+- Selecting individual tiles
+- Extending a selection into rectangular regions
+- Visual highlighting of the selected region
+- Displaying selected tile coordinates
+- Map serialization support for writing tile IDs back to a text file
+
+The visual tile palette and direct painting workflow are still being developed.
 
 ## Controls
+
+### Gameplay
 
 | Input | Action |
 | --- | --- |
 | `A` | Move left |
 | `D` | Move right |
-| `K` | Jump / hold for increased jump height |
+| `K` | Jump |
+| Hold `K` | Sustain jump for additional height |
+| `Y` | Enter map editor |
+
+### Map Editor
+
+| Input | Action |
+| --- | --- |
+| `W` | Move camera up |
+| `A` | Move camera left |
+| `S` | Move camera down |
+| `D` | Move camera right |
+| `Q` | Zoom out |
+| `E` | Zoom in |
+| Left Click | Select a tile |
+| `Shift` + Left Click | Extend the current selection |
+| `Y` | Return to gameplay |
+
+Editor zoom is currently limited to a range of `0.4x` to `2.0x`.
 
 ## Build
 
@@ -74,115 +111,43 @@ The project is currently focused on developing the underlying systems for a tile
 
 - CMake 3.24 or newer
 - A C++17-compatible compiler
-- Git and internet access during initial configuration so CMake can retrieve raylib
+- Git and internet access during initial configuration
 
-Configure and build from the project root:
+raylib 6.0 is downloaded automatically through CMake using `FetchContent`.
+
+### Configure and Build
+
+From the project root:
 
 ```bash
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
 cmake --build build
 ```
 
-Run from the project root:
+Run:
 
 ```bash
 ./build/TowerFortress
 ```
 
-The executable should currently be launched from the project root because assets are loaded using relative paths such as:
+The game should currently be launched from the project root because assets are loaded using relative paths such as:
 
 ```text
-assets/mapdata.txt
+assets/map-one.txt
 assets/desert-ruins.png
 ```
 
-## Tile Map Format
+### Compiler Warnings
 
-Maps are stored as text files containing two-digit tile IDs separated by spaces.
-
-Example:
+For GCC and Clang, the project enables:
 
 ```text
-00 00 00 00 00
-00 08 08 08 00
-00 08 08 08 00
-00 00 00 00 00
+-Wall
+-Wextra
+-Wpedantic
 ```
 
-Each tile ID indexes the `TILE_PROPERTIES` table defined in `GameConfig.h`.
-
-A tile property currently contains:
-
-```cpp
-struct TileProperties
-{
-    Rectangle sourceRect;
-    bool isSolid;
-};
-```
-
-This allows a tile ID to determine both:
-
-- which portion of the tilesheet should be rendered;
-- whether the tile participates in player collision.
-
-The current test map is larger than the game window, allowing the camera and world-space movement systems to be tested.
-
-### Current Parser Limitation
-
-The current map parser expects each tile ID to:
-
-- contain exactly two characters;
-- be separated by one character, currently a space.
-
-Map parsing and validation are still being developed and will eventually be made less dependent on fixed-width formatting.
-
-## Tilesheet Rendering
-
-The current tilesheet is:
-
-```text
-assets/desert-ruins.png
-```
-
-Tile graphics are stored in a single texture rather than loading a separate texture for every tile.
-
-The source tiles are 16x16 pixels. `TILE_PROPERTIES` stores the appropriate source rectangle for each supported tile ID:
-
-```cpp
-TileProperties{GetTileSourceRect(...), true}
-```
-
-During rendering, the source rectangle is drawn into the tile's world-space destination rectangle using raylib's `DrawTexturePro()`.
-
-Conceptually:
-
-```text
-Tile ID
-   |
-   v
-TILE_PROPERTIES[id]
-   |
-   +----> solidity
-   |
-   +----> source rectangle
-              |
-              v
-         tilesheet texture
-              |
-              v
-       rendered world tile
-```
-
-## Camera and World Space
-
-The map is independent of the game window size.
-
-The player and tiles remain at their actual world coordinates while raylib's `Camera2D` determines which portion of the world is visible.
-
-The camera follows the player while remaining constrained to the boundaries of the loaded map.
-
-Only tiles within the camera's visible area are currently submitted for rendering.
+to help catch common errors and questionable code during development.
 
 ## Project Structure
 
@@ -190,12 +155,20 @@ Only tiles within the camera's visible area are currently submitted for renderin
 Tower-Fortress/
 ├── assets/
 │   ├── desert-ruins.png
-│   └── mapdata.txt
+│   ├── map-one.txt
+│   ├── map-two.txt
+│   ├── savedMap.txt
+│   ├── soliditycheckmap.txt
+│   └── tile-id-guide.png
 │
 ├── src/
-│   ├── debug/
-│   │   ├── Debug.cpp
-│   │   └── Debug.h
+│   ├── camera/
+│   │   ├── CameraController.cpp
+│   │   └── CameraController.h
+│   │
+│   ├── editor/
+│   │   ├── MapEditor.cpp
+│   │   └── MapEditor.h
 │   │
 │   ├── player/
 │   │   ├── Player.cpp
@@ -208,6 +181,7 @@ Tower-Fortress/
 │   │   └── Tile.h
 │   │
 │   ├── GameConfig.h
+│   ├── GameState.h
 │   └── main.cpp
 │
 ├── CMakeLists.txt
@@ -216,84 +190,292 @@ Tower-Fortress/
 
 ## Architecture
 
-The project is currently divided into several small systems.
+The project is divided into several small systems with separate responsibilities.
 
 ### `Player`
 
 Responsible for:
 
-- player movement;
-- velocity and acceleration;
-- jumping;
-- coyote time and jump buffering;
-- collision detection and resolution;
-- player rendering.
+- Player position and dimensions
+- Horizontal acceleration and deceleration
+- Gravity and jumping
+- Coyote time
+- Jump buffering
+- Horizontal and vertical collision resolution
+- Player rendering
+
+Player collision is resolved independently along the X and Y axes.
+
+For each projected movement step, the player determines the nearby tiles that could participate in a collision and selects the nearest valid blocking surface before correcting its position.
 
 ### `Map`
 
 Responsible for:
 
-- loading map data;
-- storing map dimensions;
-- constructing tiles;
-- loading and unloading the tilesheet texture;
-- retrieving tiles by grid position;
-- determining the camera-visible tile range;
-- rendering visible tiles.
+- Loading map data from text files
+- Determining map width and height
+- Constructing and storing tiles
+- Owning the tilesheet texture
+- Retrieving tiles by grid coordinate
+- Modifying tile IDs
+- Determining which tiles are visible to the camera
+- Rendering visible tiles
+
+`Map` owns its raylib texture resource and releases it through its destructor.
+
+Copy construction and copy assignment are disabled to prevent multiple `Map` objects from attempting to manage the same texture resource.
 
 ### `Tile`
 
-Stores the minimal per-tile state:
+Each `Tile` stores only:
 
-- tile ID;
-- world-space rectangle.
+- Its tile ID
+- Its world-space rectangle
 
-Gameplay and visual properties are looked up from the tile ID rather than duplicated inside every tile instance.
+Rendering and collision properties are not duplicated inside every tile.
+
+Instead, a tile uses its ID to access the shared `TILE_PROPERTIES` lookup table.
+
+### `CameraController`
+
+Responsible for:
+
+- Owning the raylib `Camera2D`
+- Following the player during gameplay
+- Preventing the gameplay camera from exposing areas beyond the map
+- Providing independent free movement in editor mode
+- Managing editor zoom
+
+This keeps camera behavior separate from both the player and map systems.
+
+### `MapEditor`
+
+Responsible for editor-specific interaction and state.
+
+It currently maintains:
+
+- A reference to the map being edited
+- The current tile selection
+- Mouse-to-world coordinate conversion
+- Rectangular selection behavior
+- Selection rendering
+- Editor UI
+- Map serialization support
+
+The editor references the existing `Map` rather than duplicating map dimensions, tiles, or texture resources.
+
+### `GameState`
+
+The application currently switches between two states:
+
+```cpp
+enum class GameState
+{
+    PlayerFocused,
+    MapEditor
+};
+```
+
+This keeps gameplay input and editor input from running simultaneously.
 
 ### `GameConfig`
 
-Contains shared configuration and tile definitions, including:
+Contains shared constants and configuration, including:
 
-- tile and window dimensions;
-- movement timing constants;
-- tile source-rectangle generation;
-- the tile-property lookup table.
+- Window dimensions
+- World tile dimensions
+- Player movement timing constants
+- Custom colors
+- Tilesheet dimensions
+- Tile source-rectangle generation
+- The tile-property lookup table
+
+## Tile Properties
+
+Tile behavior and appearance are defined using:
+
+```cpp
+struct TileProperties
+{
+    Rectangle sourceRect;
+    bool isSolid;
+};
+```
+
+The index of `TILE_PROPERTIES` corresponds directly to the tile ID.
+
+For example:
+
+```text
+Tile ID
+   |
+   v
+TILE_PROPERTIES[id]
+   |
+   +------> source rectangle
+   |
+   +------> solidity
+```
+
+This allows map files to store only integer tile IDs while rendering and gameplay behavior are defined centrally.
+
+The current tileset defines 72 tile IDs.
+
+## Tile Map Format
+
+Maps are currently represented as text files containing two-digit tile IDs separated by spaces.
+
+Example:
+
+```text
+08 08 08 08 08
+08 32 32 33 08
+08 32 30 33 08
+00 00 00 00 00
+```
+
+Each number corresponds to an index in `TILE_PROPERTIES`.
+
+The loader converts these IDs into `Tile` objects positioned within the world grid.
+
+### Current Parser Limitation
+
+The parser currently assumes:
+
+- Every tile ID contains exactly two characters
+- Tile IDs are separated by exactly one character
+- The current separator is a space
+
+Because the loader relies on fixed character offsets, map parsing is still more format-dependent than intended.
+
+Replacing the fixed-width parser with token-based integer parsing is a planned cleanup task.
+
+## Rendering Pipeline
+
+World objects are rendered inside raylib's `BeginMode2D()` / `EndMode2D()` block:
+
+```text
+BeginDrawing
+    |
+    +-- BeginMode2D(camera)
+    |      |
+    |      +-- Map
+    |      +-- Map Editor overlays
+    |      +-- Player
+    |
+    +-- EndMode2D
+    |
+    +-- Screen-space editor UI
+    |
+EndDrawing
+```
+
+This keeps world coordinates independent from screen coordinates.
+
+The map calculates the visible world area using the camera target, offset, and zoom, converts that region into tile coordinates, and renders only the relevant portion of the map.
+
+## Tilesheet
+
+The current tilesheet is:
+
+```text
+assets/desert-ruins.png
+```
+
+Rather than creating an individual texture for every tile, the entire tilesheet is loaded once.
+
+Each tile property contains a `Rectangle` describing the corresponding 16x16 region of the tilesheet.
+
+raylib's `DrawTexturePro()` then scales that source rectangle into the tile's world-space destination rectangle.
+
+```text
+desert-ruins.png
+       |
+       v
+single Texture2D
+       |
+       +-- source rectangle for tile 0
+       +-- source rectangle for tile 1
+       +-- source rectangle for tile 2
+       +-- ...
+       |
+       v
+DrawTexturePro()
+       |
+       v
+100x100 world tile
+```
 
 ## Current Development State
 
-Tower Fortress is still an early gameplay and engine prototype rather than a complete game.
+Tower Fortress is currently an engine/gameplay prototype rather than a finished game.
 
-The project currently has a functional foundation for:
+The project now has functional foundations for:
 
 ```text
-player movement
+Player Movement
        +
-tile collision
+Tile Collision
        +
-large tile maps
+Text-Based Maps
        +
-camera movement
+Tilesheet Rendering
        +
-tilesheet rendering
+Large Scrollable Worlds
+       +
+Camera Control
+       +
+In-Game Map Editing
 ```
 
-The player is still represented by a simple rectangle, and the current map primarily exists to test movement, collision, camera behavior, and rendering.
+Recent development has focused heavily on refactoring the codebase so that the editor, camera, map, player, and application state have clearer responsibilities before additional gameplay systems are introduced.
 
-## Planned Development
+## Current Priorities
 
-Near-term areas of development include:
+Near-term development includes:
 
-- improving map parsing and validation;
-- cleaning up temporary debugging code;
-- adding player sprites and animation;
-- expanding level design beyond the current test map;
-- refining camera behavior based on gameplay needs;
-- introducing additional gameplay objects and mechanics.
+- Finishing the visual tile palette
+- Allowing selected tiles to be painted directly into the map
+- Improving map saving and loading
+- Replacing fixed-width map parsing with token-based parsing
+- Improving editor usability
+- Continuing code cleanup and consistency improvements
+- Adding player sprites and animation
+- Building more complete levels using the editor
 
-More advanced systems such as enemies, hazards, moving platforms, level transitions, audio, and broader game-state management can be added once the current foundation is sufficiently stable.
+Later systems may include:
+
+- Hazards
+- Moving platforms
+- Enemies
+- Interactive objects
+- Level transitions
+- Audio
+- Additional game states
+
+## Purpose
+
+Tower Fortress is being developed both as a game and as a way to practice larger-scale C++ software development.
+
+The project has provided experience with:
+
+- Object-oriented organization
+- Multi-file C++ projects
+- Resource ownership
+- References and const-correctness
+- CMake
+- Git workflows
+- Collision detection and resolution
+- Coordinate systems
+- Camera transformations
+- Texture atlases
+- File parsing and serialization
+- Interactive development tooling
+- Refactoring evolving code
+- Separating responsibilities across systems
 
 ## Author
 
 **Haroon Awan**
 
-[GitHub](https://github.com/P3rsin)
+GitHub: [P3rsin](https://github.com/P3rsin)
