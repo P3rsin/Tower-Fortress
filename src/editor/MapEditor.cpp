@@ -45,6 +45,58 @@ void MapEditor::highlightTiles() const
 
 void MapEditor::drawPalette() const
 {
+    int pbdHeightTiles = TILE_PROPERTIES.size() / WINDOW_TILE_WIDTH;
+
+    if (TILE_PROPERTIES.size() % WINDOW_TILE_WIDTH != 0)
+    {
+        pbdHeightTiles++;
+    }
+
+    int pbdY = WINDOW_HEIGHT - (pbdHeightTiles * TILE_SIZE);
+
+    Rectangle paletteBackDrop = {
+        0.0f,
+        static_cast<float>(pbdY) - BORDER_SIZE * 2,
+        static_cast<float>(WINDOW_WIDTH),
+        static_cast<float>(pbdHeightTiles * TILE_SIZE) + BORDER_SIZE * 2};
+
+    DrawRectangleRec(paletteBackDrop, DARK_CHARCOAL);
+
+    for (int i = 0; i < TILE_PROPERTIES.size(); i++)
+    {
+        Rectangle source = TILE_PROPERTIES[i].sourceRect;
+
+        int rowCounter = i / WINDOW_TILE_WIDTH;
+
+        constexpr float TILE_PADDING = 2.0f;
+
+        float x =
+            BORDER_SIZE +
+            (i % WINDOW_TILE_WIDTH) * TILE_SIZE +
+            TILE_PADDING;
+
+        float y =
+            paletteBackDrop.y +
+            BORDER_SIZE +
+            (rowCounter * TILE_SIZE) +
+            TILE_PADDING;
+
+        Rectangle destination = {
+            x,
+            y,
+            TILE_SIZE - TILE_PADDING * 2,
+            TILE_SIZE - TILE_PADDING * 2};
+
+        DrawTexturePro(
+            map.getTileSheet(),
+            source,
+            destination,
+            {0.0f, 0.0f},
+            0.0f,
+            WHITE);
+    }
+
+    DrawRectangleLinesEx(paletteBackDrop, 4.0f, WHITE);
 }
 
 void MapEditor::update(const Camera2D &camera)
@@ -91,13 +143,7 @@ void MapEditor::drawUI() const
         DrawText(TextFormat("Tile 2: [%d:%d]", selection->end.x, selection->end.y), 20, 85, 28, WHITE);
     }
 
-    DrawTexturePro(
-        map.getTileSheet(),
-        TILE_PROPERTIES[0].sourceRect,
-        Rectangle{0, 200, TILE_SIZE, TILE_SIZE},
-        {0.0f, 0.0f},
-        0.0f,
-        WHITE);
+    drawPalette();
 }
 
 void MapEditor::save() const

@@ -16,12 +16,16 @@ constexpr int WINDOW_HEIGHT = WINDOW_TILE_HEIGHT * TILE_SIZE;
 // CUSTOM COLORS
 constexpr Color BRIGHT_YELLOW = {255, 220, 0, 255};
 constexpr Color DARK_CHARCOAL = {30, 30, 30, 255};
-constexpr Color BRIGHT_CYAN = {0, 255, 255, 255}; 
+constexpr Color BRIGHT_CYAN = {0, 255, 255, 255};
 
 // MAP FILE PARSING - based on txt formatting used
 constexpr std::size_t TILE_ID_LENGTH = 2;
 constexpr std::size_t TILE_ID_SEPARATOR_LENGTH = 1;
 constexpr std::size_t TILE_ID_STRIDE = TILE_ID_LENGTH + TILE_ID_SEPARATOR_LENGTH;
+
+// MAP EDITOR PALETTE PRINTING
+constexpr float BORDER_SIZE = 4.0f;
+constexpr float TILE_PADDING = 2.0f;
 
 // PLAYER MOVEMENT
 constexpr float COYOTE_TIME = 0.05f;
