@@ -171,6 +171,10 @@ void MapEditor::update(const Camera2D &camera)
     {
         applySelectedTile();
     }
+    else if (IsKeyPressed(KEY_P))
+    {
+        map.save();
+    }
 }
 
 void MapEditor::draw() const
@@ -190,33 +194,4 @@ void MapEditor::drawUI() const
     }
 
     drawPalette();
-}
-
-void MapEditor::save() const
-{
-    std::ofstream file("assets/savedMap.txt");
-
-    int rowCount = 0;
-
-    for (const Tile &tile : map.getTileList())
-    {
-        if (tile.getID() < 10)
-        {
-            file << '0' << tile.getID() << ' ';
-        }
-        else
-        {
-            file << tile.getID() << ' ';
-        }
-
-        rowCount++;
-
-        if (rowCount == map.getWidth())
-        {
-            file << '\n';
-            rowCount = 0;
-        }
-    }
-
-    file.close();
 }

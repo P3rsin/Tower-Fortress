@@ -27,12 +27,10 @@ int main()
         }
         else if (IsKeyPressed(KEY_Y) && gameState == GameState::MapEditor)
         {
-            cameraC.setZoom(1.0f);
-
             gameState = GameState::PlayerFocused;
+            cameraC.setZoom(1.0f);
         }
 
-        // update based on gamemode
         if (gameState == GameState::PlayerFocused)
         {
             player.update(map);

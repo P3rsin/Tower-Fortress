@@ -33,7 +33,6 @@ public:
     void setPalette();
     void drawPalette() const;
     void update(const Camera2D &camera);
-    void save() const;
     void draw() const;
     void drawUI() const;
 

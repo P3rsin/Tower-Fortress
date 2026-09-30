@@ -79,6 +79,35 @@ void Map::load(const std::string &filePath)
     createTiles();
 }
 
+void Map::save() const
+{
+    std::ofstream file("assets/savedMap.txt");
+
+    int rowCount = 0;
+
+    for (const Tile &tile : tileList)
+    {
+        if (tile.getID() < 10)
+        {
+            file << '0' << tile.getID() << ' ';
+        }
+        else
+        {
+            file << tile.getID() << ' ';
+        }
+
+        rowCount++;
+
+        if (rowCount == width)
+        {
+            file << '\n';
+            rowCount = 0;
+        }
+    }
+
+    file.close();
+}
+
 void Map::draw(const Camera2D &camera) const
 {
     float halfViewWidth = camera.offset.x / camera.zoom;

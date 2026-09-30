@@ -15,6 +15,7 @@ public:
     Map &operator=(const Map &) = delete;
 
     void load(const std::string &filePath);
+    void save() const;
     void draw(const Camera2D &camera) const;
 
     const Tile &getTile(TileCoord coordinate) const;
